@@ -1,0 +1,23 @@
+includes:
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+
+parameters:
+    # Run at maximum strictness level
+    level: 8
+
+    # Paths to analyze
+    paths:
+        - src
+        - tests
+
+    # Don't treat PHPDoc types as certain to catch type issues
+    treatPhpDocTypesAsCertain: false
+
+    # Add ignored errors here if needed
+    ignoreErrors:
+        # Regex match groups always exist when matched
+        - '#isset\(\) always exists and is not nullable#'
+        - '#Strict comparison using !== between .* will always evaluate to true#'
+        # array_map preserves list structure
+        - message: '#should return list<.*> but returns array<#'
+          path: src/Storage/Database.php

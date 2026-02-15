@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self-Review</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+        }
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e6edf3;
+        }
+        .file-count {
+            color: #7d8590;
+            font-size: 14px;
+        }
+        .context-banner {
+            background: #161b22;
+            padding: 16px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        .context-banner h3 {
+            font-size: 12px;
+            color: #7d8590;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .context-banner p {
+            color: #e6edf3;
+            line-height: 1.5;
+        }
+        .layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 16px;
+        }
+        .file-tree {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            position: sticky;
+            top: 16px;
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+        .file-tree-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #30363d;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .file-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #e6edf3;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #21262d;
+        }
+        .file-item:hover {
+            background: #21262d;
+        }
+        .file-item.active {
+            background: #1f6feb33;
+        }
+        .file-item .status {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+        .status.added { background: #238636; color: #fff; }
+        .status.modified { background: #9e6a03; color: #fff; }
+        .status.deleted { background: #da3633; color: #fff; }
+        .status.renamed { background: #58a6ff; color: #000; }
+        .file-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .main-content {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .file-header {
+            padding: 12px 16px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+        }
+        .diff-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            font-size: 12px;
+            line-height: 20px;
+        }
+        .diff-table td {
+            padding: 0;
+            vertical-align: top;
+        }
+        .hunk-header-row td {
+            background: #1f3d5c;
+            color: #79c0ff;
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+        .line-num {
+            width: 50px;
+            min-width: 50px;
+            padding: 0 10px;
+            text-align: right;
+            color: #7d8590;
+            user-select: none;
+            background: #161b22;
+            position: relative;
+            cursor: pointer;
+        }
+        .line-num:hover {
+            color: #58a6ff;
+        }
+        .line-num .add-btn {
+            position: absolute;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            background: #238636;
+            border: none;
+            border-radius: 3px;
+            color: #fff;
+            font-size: 14px;
+            line-height: 16px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .line-num:hover .add-btn {
+            display: flex;
+        }
+        .line-num .add-btn:hover {
+            background: #2ea043;
+        }
+        .line-content {
+            padding: 0 10px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .diff-row.add .line-num.new {
+            background: #12261e;
+        }
+        .diff-row.add .line-content {
+            background: #12261e;
+            color: #7ee787;
+        }
+        .diff-row.remove .line-num.old {
+            background: #2d1b1e;
+        }
+        .diff-row.remove .line-content {
+            background: #2d1b1e;
+            color: #f97583;
+        }
+        .diff-row.context .line-content {
+            background: #0d1117;
+        }
+        .diff-row.context .line-num {
+            background: #0d1117;
+        }
+        /* Selected range highlighting */
+        .diff-row.selected-range .line-content {
+            background: #1f3d5c !important;
+            border-left: 2px solid #58a6ff;
+        }
+        .diff-row.selected-range .line-num {
+            background: #1f3d5c !important;
+        }
+        .shift-hint {
+            font-size: 11px;
+            color: #7d8590;
+            margin-left: 8px;
+            font-style: italic;
+        }
+        /* Inline comment form */
+        .inline-comment-row td {
+            background: #161b22;
+            padding: 0;
+        }
+        .inline-comment-form {
+            margin: 0 16px 16px 16px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .inline-comment-header {
+            background: #21262d;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #7d8590;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .inline-comment-body {
+            padding: 12px;
+            background: #0d1117;
+        }
+        .inline-comment-form textarea {
+            width: 100%;
+            min-height: 100px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e6edf3;
+            padding: 10px 12px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .inline-comment-form textarea:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
+        }
+        .inline-comment-form .suggestion-input {
+            margin-top: 8px;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            font-size: 12px;
+            min-height: 80px;
+        }
+        .inline-comment-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+        .tag-select {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e6edf3;
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+        .btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: #238636;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: #2ea043;
+        }
+        .btn-secondary {
+            background: #21262d;
+            border-color: #30363d;
+            color: #e6edf3;
+        }
+        .btn-secondary:hover {
+            background: #30363d;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        /* Existing comment thread */
+        .comment-thread {
+            margin: 0 16px 16px 16px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .comment-thread-header {
+            background: #21262d;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+        .comment-tag {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+        .tag-question { background: #1f6feb; color: #fff; }
+        .tag-issue { background: #f85149; color: #fff; }
+        .tag-suggestion { background: #238636; color: #fff; }
+        .tag-praise { background: #9e6a03; color: #fff; }
+        .tag-nitpick { background: #6e7681; color: #fff; }
+        .tag-blocker { background: #da3633; color: #fff; }
+        .comment-thread-body {
+            padding: 12px;
+            background: #0d1117;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .comment-suggestion {
+            margin-top: 12px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+        .comment-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .comment-actions button {
+            background: none;
+            border: none;
+            color: #7d8590;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .comment-actions button:hover {
+            background: #30363d;
+            color: #e6edf3;
+        }
+        /* Submit panel */
+        .submit-panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+        .submit-panel h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .verdict-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .verdict-btn {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            background: #21262d;
+            color: #7d8590;
+            cursor: pointer;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.15s;
+        }
+        .verdict-btn:hover {
+            background: #30363d;
+            color: #e6edf3;
+        }
+        .verdict-btn.selected {
+            border-color: #238636;
+            background: #238636;
+            color: #fff;
+        }
+        .verdict-btn.changes.selected {
+            border-color: #da3633;
+            background: #da3633;
+        }
+        .verdict-btn.comment.selected {
+            border-color: #1f6feb;
+            background: #1f6feb;
+        }
+        .submit-panel textarea {
+            width: 100%;
+            min-height: 80px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e6edf3;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: #238636;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .submit-btn:hover {
+            background: #2ea043;
+        }
+        .submit-btn:disabled {
+            background: #21262d;
+            color: #7d8590;
+            cursor: not-allowed;
+        }
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #7d8590;
+        }
+        .error {
+            background: #2d1b1e;
+            border: 1px solid #da3633;
+            padding: 16px;
+            border-radius: 6px;
+            color: #f85149;
+        }
+        #app {
+            min-height: 100vh;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #7d8590;
+        }
+        .line-indicator {
+            color: #7d8590;
+            font-size: 11px;
+        }
+        /* Chat panel */
+        .chat-panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            margin-top: 16px;
+        }
+        .chat-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .chat-header h3 {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chat-header .badge {
+            background: #1f6feb;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+        .chat-toggle {
+            color: #7d8590;
+            font-size: 12px;
+        }
+        .chat-body {
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .chat-body.open {
+            display: block;
+        }
+        .chat-messages {
+            padding: 16px;
+        }
+        .chat-message {
+            margin-bottom: 12px;
+            display: flex;
+            gap: 8px;
+        }
+        .chat-message.user {
+            flex-direction: row;
+        }
+        .chat-message.assistant {
+            flex-direction: row;
+        }
+        .chat-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .chat-message.user .chat-avatar {
+            background: #1f6feb;
+        }
+        .chat-message.assistant .chat-avatar {
+            background: #238636;
+        }
+        .chat-bubble {
+            background: #21262d;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            max-width: 85%;
+        }
+        .chat-message.user .chat-bubble {
+            background: #1f3d5c;
+        }
+        .chat-context {
+            font-size: 11px;
+            color: #7d8590;
+            margin-bottom: 4px;
+        }
+        .chat-status {
+            font-size: 11px;
+            margin-top: 4px;
+        }
+        .chat-status.pending {
+            color: #f0883e;
+        }
+        .chat-status.processing {
+            color: #58a6ff;
+        }
+        .chat-status.error {
+            color: #f85149;
+        }
+        .chat-input-area {
+            padding: 12px 16px;
+            border-top: 1px solid #30363d;
+            display: flex;
+            gap: 8px;
+        }
+        .chat-input-area input {
+            flex: 1;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e6edf3;
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+        .chat-input-area input:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+        .chat-input-area input::placeholder {
+            color: #7d8590;
+        }
+        .chat-empty {
+            text-align: center;
+            padding: 24px;
+            color: #7d8590;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="loading">Loading review...</div>
+        </div>
+    </div>
+
+    <script>
+        // Self-Review Application
+        const App = {
+            state: {
+                diff: null,
+                context: null,
+                comments: [],
+                selectedFile: null,
+                verdict: null,
+                summaryNote: '',
+                loading: true,
+                error: null,
+                activeCommentLine: null, // { startLine, endLine, side } - Track which lines have the comment form open
+                pendingLineStart: null,  // For shift+click range selection
+                chatMessages: [],
+                chatOpen: false,
+                chatPolling: null,
+                hasPendingChat: false
+            },
+
+            async init() {
+                try {
+                    const [diffRes, contextRes, commentsRes, chatRes] = await Promise.all([
+                        fetch('/api/diff'),
+                        fetch('/api/context'),
+                        fetch('/api/comments'),
+                        fetch('/api/chat')
+                    ]);
+
+                    this.state.diff = await diffRes.json();
+                    this.state.context = (await contextRes.json()).context;
+                    this.state.comments = (await commentsRes.json()).comments;
+                    const chatData = await chatRes.json();
+                    this.state.chatMessages = chatData.messages || [];
+                    this.state.hasPendingChat = chatData.has_pending || false;
+                    this.state.loading = false;
+
+                    if (this.state.diff.files && this.state.diff.files.length > 0) {
+                        this.state.selectedFile = this.state.diff.files[0].path;
+                    }
+
+                    // Start polling for chat updates if there are pending questions
+                    this.startChatPolling();
+
+                    this.render();
+                } catch (e) {
+                    this.state.error = e.message;
+                    this.state.loading = false;
+                    this.render();
+                }
+            },
+
+            startChatPolling() {
+                // Poll every 3 seconds when we have pending questions
+                if (this.state.chatPolling) clearInterval(this.state.chatPolling);
+                this.state.chatPolling = setInterval(async () => {
+                    if (this.state.hasPendingChat) {
+                        await this.refreshChat();
+                    }
+                }, 3000);
+            },
+
+            async refreshChat() {
+                try {
+                    const chatRes = await fetch('/api/chat');
+                    const chatData = await chatRes.json();
+                    this.state.chatMessages = chatData.messages || [];
+                    this.state.hasPendingChat = chatData.has_pending || false;
+                    this.render();
+                } catch (e) {
+                    console.error('Failed to refresh chat:', e);
+                }
+            },
+
+            toggleChat() {
+                this.state.chatOpen = !this.state.chatOpen;
+                this.render();
+                // Scroll to bottom of chat when opening
+                if (this.state.chatOpen) {
+                    setTimeout(() => {
+                        const chatBody = document.getElementById('chatBody');
+                        if (chatBody) chatBody.scrollTop = chatBody.scrollHeight;
+                    }, 0);
+                }
+            },
+
+            async sendChatMessage() {
+                const input = document.getElementById('chatInput');
+                const content = input.value.trim();
+                if (!content) return;
+
+                try {
+                    const res = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            content: content,
+                            file_context: this.state.selectedFile
+                        })
+                    });
+
+                    if ((await res.json()).success) {
+                        input.value = '';
+                        await this.refreshChat();
+                    }
+                } catch (e) {
+                    console.error('Failed to send message:', e);
+                }
+            },
+
+            selectFile(path) {
+                this.state.selectedFile = path;
+                this.state.activeCommentLine = null;
+                this.state.pendingLineStart = null;
+                this.render();
+            },
+
+            setVerdict(verdict) {
+                this.state.verdict = verdict;
+                this.render();
+            },
+
+            openCommentForm(lineNumber, side, event) {
+                // If shift is held and we have a pending start, create a range
+                if (event && event.shiftKey && this.state.pendingLineStart !== null) {
+                    const startLine = Math.min(this.state.pendingLineStart, lineNumber);
+                    const endLine = Math.max(this.state.pendingLineStart, lineNumber);
+                    this.state.activeCommentLine = { startLine, endLine, side };
+                    this.state.pendingLineStart = null;
+                } else {
+                    // Single line or start of a new range
+                    this.state.activeCommentLine = { startLine: lineNumber, endLine: lineNumber, side };
+                    this.state.pendingLineStart = lineNumber;
+                }
+                this.render();
+                // Focus the textarea after render
+                setTimeout(() => {
+                    const textarea = document.getElementById('inlineCommentBody');
+                    if (textarea) textarea.focus();
+                }, 0);
+            },
+
+            closeCommentForm() {
+                this.state.activeCommentLine = null;
+                this.state.pendingLineStart = null;
+                this.render();
+            },
+
+            async addComment(filePath, startLine, endLine, body, tag, suggestion) {
+                if (!body.trim()) {
+                    alert('Please enter a comment');
+                    return;
+                }
+                const res = await fetch('/api/comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        file_path: filePath,
+                        start_line: startLine,
+                        end_line: endLine,
+                        body: body,
+                        tag: tag,
+                        side: this.state.activeCommentLine?.side || 'new',
+                        suggestion: suggestion || null
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const commentsRes = await fetch('/api/comments');
+                    this.state.comments = (await commentsRes.json()).comments;
+                    this.state.activeCommentLine = null;
+                    this.state.pendingLineStart = null;
+                    this.render();
+                }
+            },
+
+            async deleteComment(id) {
+                await fetch(`/api/comments/${id}`, { method: 'DELETE' });
+                this.state.comments = this.state.comments.filter(c => c.id !== id);
+                this.render();
+            },
+
+            async submit() {
+                if (!this.state.verdict) {
+                    alert('Please select a verdict');
+                    return;
+                }
+
+                const res = await fetch('/api/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        verdict: this.state.verdict,
+                        summary_note: this.state.summaryNote || null
+                    })
+                });
+
+                if ((await res.json()).success) {
+                    document.getElementById('app').innerHTML = `
+                        <div class="container">
+                            <div style="text-align: center; padding: 100px 20px;">
+                                <div style="font-size: 64px; margin-bottom: 20px;">✓</div>
+                                <h1 style="color: #238636; margin-bottom: 16px;">Review Submitted</h1>
+                                <p style="color: #7d8590; margin-bottom: 24px;">
+                                    You can close this window. The agent will receive your feedback.
+                                </p>
+                                <div style="background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 16px; display: inline-block;">
+                                    <p style="color: #e6edf3; margin-bottom: 8px;">
+                                        Verdict: <strong>${this.state.verdict.replace('_', ' ')}</strong>
+                                    </p>
+                                    <p style="color: #7d8590;">
+                                        ${this.state.comments.length} comment${this.state.comments.length !== 1 ? 's' : ''}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+
+            escapeHtml(str) {
+                return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            },
+
+            renderChatPanel() {
+                const pendingCount = this.state.chatMessages.filter(m => m.role === 'user' && m.status === 'pending').length;
+                const processingCount = this.state.chatMessages.filter(m => m.role === 'user' && m.status === 'processing').length;
+                const totalMessages = this.state.chatMessages.length;
+
+                let messagesHtml = '';
+                if (totalMessages === 0) {
+                    messagesHtml = `<div class="chat-empty">
+                        <p>💬 Ask the agent questions about the code changes</p>
+                        <p style="margin-top: 8px; font-size: 11px;">Questions will be answered when the agent calls self-review-chat</p>
+                    </div>`;
+                } else {
+                    this.state.chatMessages.forEach(msg => {
+                        const isUser = msg.role === 'user';
+                        const avatar = isUser ? '👤' : '🤖';
+                        let contextHtml = '';
+                        if (msg.file_context) {
+                            contextHtml = `<div class="chat-context">
+                                📁 ${this.escapeHtml(msg.file_context)}${msg.line_context ? `:${msg.line_context}` : ''}
+                            </div>`;
+                        }
+                        let statusHtml = '';
+                        if (isUser && msg.status === 'pending') {
+                            statusHtml = '<div class="chat-status pending">⏳ Waiting for agent...</div>';
+                        } else if (isUser && msg.status === 'processing') {
+                            statusHtml = '<div class="chat-status processing">🔄 Agent is responding...</div>';
+                        } else if (msg.status === 'error') {
+                            statusHtml = `<div class="chat-status error">❌ ${this.escapeHtml(msg.error_message || 'Error')}</div>`;
+                        }
+                        messagesHtml += `<div class="chat-message ${msg.role}">
+                            <div class="chat-avatar">${avatar}</div>
+                            <div>
+                                ${contextHtml}
+                                <div class="chat-bubble">${this.escapeHtml(msg.content)}</div>
+                                ${statusHtml}
+                            </div>
+                        </div>`;
+                    });
+                }
+
+                let badgeHtml = '';
+                if (pendingCount > 0) {
+                    badgeHtml = `<span class="badge">${pendingCount} pending</span>`;
+                } else if (processingCount > 0) {
+                    badgeHtml = `<span class="badge" style="background: #58a6ff;">processing...</span>`;
+                }
+
+                return `
+                    <div class="chat-panel">
+                        <div class="chat-header" onclick="App.toggleChat()">
+                            <h3>💬 Ask the Agent ${badgeHtml}</h3>
+                            <span class="chat-toggle">${this.state.chatOpen ? '▼ Hide' : '▶ Show'}</span>
+                        </div>
+                        <div id="chatBody" class="chat-body ${this.state.chatOpen ? 'open' : ''}">
+                            <div class="chat-messages">
+                                ${messagesHtml}
+                            </div>
+                            <div class="chat-input-area">
+                                <input type="text" id="chatInput"
+                                       placeholder="Ask a question about the code changes..."
+                                       onkeypress="if(event.key === 'Enter') App.sendChatMessage()">
+                                <button class="btn btn-primary" onclick="App.sendChatMessage()">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderDiffTable(file) {
+                if (!file || !file.hunks || file.hunks.length === 0) {
+                    return '<div class="empty-state">No changes to display</div>';
+                }
+
+                const fileComments = this.state.comments.filter(c => c.file_path === this.state.selectedFile);
+                // Group comments by their end_line (where they should be displayed)
+                const commentsByLine = {};
+                fileComments.forEach(c => {
+                    const key = `${c.end_line}-${c.side}`;
+                    if (!commentsByLine[key]) commentsByLine[key] = [];
+                    commentsByLine[key].push(c);
+                });
+
+                let html = '<table class="diff-table">';
+
+                file.hunks.forEach(hunk => {
+                    // Hunk header row
+                    html += `<tr class="hunk-header-row">
+                        <td colspan="4">@@ -${hunk.oldStart},${hunk.oldCount} +${hunk.newStart},${hunk.newCount} @@</td>
+                    </tr>`;
+
+                    hunk.lines.forEach(line => {
+                        const lineClass = line.type === 'add' ? 'add' : line.type === 'remove' ? 'remove' : 'context';
+                        const prefix = line.type === 'add' ? '+' : line.type === 'remove' ? '-' : ' ';
+                        const lineNum = line.type === 'remove' ? line.oldLine : line.newLine;
+                        const side = line.type === 'remove' ? 'old' : 'new';
+
+                        // Check if this line is in the selected range for highlighting
+                        const isInRange = this.state.activeCommentLine &&
+                            this.state.activeCommentLine.side === side &&
+                            lineNum >= this.state.activeCommentLine.startLine &&
+                            lineNum <= this.state.activeCommentLine.endLine;
+
+                        html += `<tr class="diff-row ${lineClass}${isInRange ? ' selected-range' : ''}">
+                            <td class="line-num old">${line.oldLine || ''}</td>
+                            <td class="line-num new" onclick="App.openCommentForm(${lineNum}, '${side}', event)">
+                                <button class="add-btn" title="Add comment (Shift+click for range)">+</button>
+                                ${line.newLine || ''}
+                            </td>
+                            <td class="line-content">${prefix}${this.escapeHtml(line.content)}</td>
+                        </tr>`;
+
+                        // Check for existing comments on this line (displayed at end_line)
+                        const commentsOnLine = commentsByLine[`${lineNum}-${side}`] || [];
+                        commentsOnLine.forEach(comment => {
+                            const lineRange = comment.start_line === comment.end_line
+                                ? `Line ${comment.start_line}`
+                                : `Lines ${comment.start_line}-${comment.end_line}`;
+                            html += `<tr class="inline-comment-row">
+                                <td colspan="3">
+                                    <div class="comment-thread">
+                                        <div class="comment-thread-header">
+                                            <span>
+                                                <span class="comment-tag tag-${comment.tag}">${comment.tag}</span>
+                                                <span class="line-indicator">${lineRange}</span>
+                                            </span>
+                                            <div class="comment-actions">
+                                                <button onclick="App.deleteComment(${comment.id})">Delete</button>
+                                            </div>
+                                        </div>
+                                        <div class="comment-thread-body">
+                                            ${this.escapeHtml(comment.body)}
+                                            ${comment.suggestion ? `<pre class="comment-suggestion">${this.escapeHtml(comment.suggestion)}</pre>` : ''}
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>`;
+                        });
+
+                        // Show comment form at the end of the selected range
+                        if (this.state.activeCommentLine &&
+                            this.state.activeCommentLine.endLine === lineNum &&
+                            this.state.activeCommentLine.side === side) {
+                            const { startLine, endLine } = this.state.activeCommentLine;
+                            const lineLabel = startLine === endLine
+                                ? `line ${startLine}`
+                                : `lines ${startLine}-${endLine}`;
+                            const shiftHint = startLine === endLine
+                                ? '<span class="shift-hint">Shift+click another line for range</span>'
+                                : '';
+                            html += `<tr class="inline-comment-row">
+                                <td colspan="3">
+                                    <div class="inline-comment-form">
+                                        <div class="inline-comment-header">
+                                            <span>Add a comment on ${lineLabel} ${shiftHint}</span>
+                                            <button class="btn btn-secondary" onclick="App.closeCommentForm()">Cancel</button>
+                                        </div>
+                                        <div class="inline-comment-body">
+                                            <textarea id="inlineCommentBody" placeholder="Leave a comment..."></textarea>
+                                            <textarea id="inlineSuggestion" class="suggestion-input" placeholder="Suggested code (optional)..."></textarea>
+                                            <div class="inline-comment-actions">
+                                                <select id="inlineTag" class="tag-select">
+                                                    <option value="question">Question</option>
+                                                    <option value="issue">Issue</option>
+                                                    <option value="suggestion">Suggestion</option>
+                                                    <option value="praise">Praise</option>
+                                                    <option value="nitpick">Nitpick</option>
+                                                    <option value="blocker">Blocker</option>
+                                                </select>
+                                                <div class="btn-group">
+                                                    <button class="btn btn-primary" onclick="App.addComment(
+                                                        '${this.escapeHtml(this.state.selectedFile)}',
+                                                        ${startLine},
+                                                        ${endLine},
+                                                        document.getElementById('inlineCommentBody').value,
+                                                        document.getElementById('inlineTag').value,
+                                                        document.getElementById('inlineSuggestion').value
+                                                    )">Add Comment</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>`;
+                        }
+                    });
+                });
+
+                html += '</table>';
+                return html;
+            },
+
+            render() {
+                const app = document.getElementById('app');
+
+                if (this.state.loading) {
+                    app.innerHTML = '<div class="container"><div class="loading">Loading review...</div></div>';
+                    return;
+                }
+
+                if (this.state.error) {
+                    app.innerHTML = `<div class="container"><div class="error">Error: ${this.escapeHtml(this.state.error)}</div></div>`;
+                    return;
+                }
+
+                const files = this.state.diff?.files || [];
+                const selectedFile = files.find(f => f.path === this.state.selectedFile);
+
+                app.innerHTML = `
+                    <div class="container">
+                        <header>
+                            <h1>Self-Review</h1>
+                            <span class="file-count">${files.length} file${files.length !== 1 ? 's' : ''} changed</span>
+                        </header>
+
+                        ${this.state.context ? `
+                            <div class="context-banner">
+                                <h3>Agent Context</h3>
+                                <p>${this.escapeHtml(this.state.context)}</p>
+                            </div>
+                        ` : ''}
+
+                        <div class="layout">
+                            <div class="file-tree">
+                                <div class="file-tree-header">Files</div>
+                                ${files.map(f => `
+                                    <div class="file-item ${f.path === this.state.selectedFile ? 'active' : ''}"
+                                         onclick="App.selectFile('${this.escapeHtml(f.path)}')">
+                                        <span class="status ${f.status}">${f.status.charAt(0).toUpperCase()}</span>
+                                        <span class="file-name" title="${this.escapeHtml(f.path)}">${f.path.split('/').pop()}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <div class="main-content">
+                                <div class="file-header">${this.escapeHtml(this.state.selectedFile) || 'No file selected'}</div>
+                                ${this.renderDiffTable(selectedFile)}
+                            </div>
+                        </div>
+
+                        ${this.renderChatPanel()}
+
+                        <div class="submit-panel">
+                            <h3>Finish your review</h3>
+                            <div class="verdict-buttons">
+                                <button class="verdict-btn ${this.state.verdict === 'approved' ? 'selected' : ''}"
+                                        onclick="App.setVerdict('approved')">
+                                    ✓ Approve
+                                </button>
+                                <button class="verdict-btn changes ${this.state.verdict === 'changes_requested' ? 'selected' : ''}"
+                                        onclick="App.setVerdict('changes_requested')">
+                                    ✗ Request Changes
+                                </button>
+                                <button class="verdict-btn comment ${this.state.verdict === 'comment' ? 'selected' : ''}"
+                                        onclick="App.setVerdict('comment')">
+                                    💬 Comment
+                                </button>
+                            </div>
+                            <textarea id="summaryNote" placeholder="Leave a summary comment (optional)..."
+                                      oninput="App.state.summaryNote = this.value">${this.escapeHtml(this.state.summaryNote)}</textarea>
+                            <button class="submit-btn" onclick="App.submit()" ${!this.state.verdict ? 'disabled' : ''}>
+                                Submit review${this.state.comments.length > 0 ? ` (${this.state.comments.length} comment${this.state.comments.length !== 1 ? 's' : ''})` : ''}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
+        // Initialize app
+        App.init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * This file is part of the MatesOfMate Organisation.
+ *
+ * (c) Johannes Wachter <johannes@sulu.io>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+// Try to find the autoloader
+$autoloadPaths = [
+    __DIR__.'/../vendor/autoload.php',
+    __DIR__.'/../../../autoload.php',
+];
+
+$autoloaded = false;
+foreach ($autoloadPaths as $path) {
+    if (file_exists($path)) {
+        require $path;
+        $autoloaded = true;
+        break;
+    }
+}
+
+if (!$autoloaded) {
+    fwrite(STDERR, "Error: Could not find autoloader. Run 'composer install' first.\n");
+    exit(1);
+}
+
+use MatesOfMate\SelfReviewExtension\Command\ReviewCommand;
+use Symfony\Component\Console\Application;
+
+$application = new Application('self-review', '0.1.0');
+$application->addCommand(new ReviewCommand());
+$application->setDefaultCommand('review', true);
+$application->run();
