@@ -1,0 +1,37 @@
+# Dependencies
+/vendor/
+
+# Composer
+composer.lock
+
+# PHP CS Fixer
+.php-cs-fixer.cache
+
+# PHPUnit
+.phpunit.cache/
+.phpunit.result.cache
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+/var/
+
+# Coverage reports
+/coverage/
+
+# Frontend (if React build is added later)
+/node_modules/
+/frontend/node_modules/
+/frontend/dist/
+
+# SQLite databases (created at runtime)
+*.sqlite
