@@ -125,10 +125,11 @@ class ReviewCommand extends Command
 
         $io->text(\sprintf('Found %d changed file(s)', $diff->getFileCount()));
 
-        // Create session
+        // Create session with chat disabled (CLI mode - no agent to answer)
         $session = $sessionFactory->create(
             $diff,
-            '' !== $context ? $context : null
+            '' !== $context ? $context : null,
+            chatEnabled: false
         );
 
         $io->success(\sprintf('Review opened at %s', $session->getUrl()));

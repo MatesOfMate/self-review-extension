@@ -5,129 +5,403 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Self-Review</title>
     <style>
+        :root {
+            --bg-canvas: #0d1117;
+            --bg-primary: #161b22;
+            --bg-secondary: #21262d;
+            --bg-tertiary: #30363d;
+            --bg-hover: #292e36;
+            --border-default: #30363d;
+            --border-muted: #21262d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-green: #238636;
+            --accent-green-hover: #2ea043;
+            --accent-blue: #1f6feb;
+            --accent-blue-hover: #388bfd;
+            --accent-red: #da3633;
+            --accent-yellow: #9e6a03;
+            --accent-purple: #8957e5;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.2s ease;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #0d1117;
-            color: #e6edf3;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            background: var(--bg-canvas);
+            color: var(--text-primary);
             min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-canvas);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 16px;
+            padding: 20px 24px;
         }
+
+        /* Header */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
-            padding: 16px;
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 6px;
+            margin-bottom: 20px;
+            padding: 16px 24px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
         }
-        h1 {
-            font-size: 20px;
-            font-weight: 600;
-            color: #e6edf3;
-        }
-        .file-count {
-            color: #7d8590;
-            font-size: 14px;
-        }
-        .context-banner {
-            background: #161b22;
-            padding: 16px;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            margin-bottom: 16px;
-        }
-        .context-banner h3 {
-            font-size: 12px;
-            color: #7d8590;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .context-banner p {
-            color: #e6edf3;
-            line-height: 1.5;
-        }
-        .layout {
-            display: grid;
-            grid-template-columns: 260px 1fr;
+
+        .header-left {
+            display: flex;
+            align-items: center;
             gap: 16px;
         }
-        .file-tree {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            position: sticky;
-            top: 16px;
-            max-height: calc(100vh - 140px);
-            overflow-y: auto;
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .file-tree-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid #30363d;
-            font-size: 14px;
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-green) 0%, var(--accent-blue) 100%);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        h1 {
+            font-size: 18px;
             font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
         }
-        .file-item {
-            padding: 8px 16px;
-            cursor: pointer;
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .file-count {
+            color: var(--text-secondary);
             font-size: 13px;
-            color: #e6edf3;
+            font-weight: 500;
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+        }
+
+        /* Finalize button */
+        .finalize-btn {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #2ea043 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
-            border-bottom: 1px solid #21262d;
+            transition: all var(--transition-fast);
+            box-shadow: 0 2px 8px rgba(35, 134, 54, 0.3);
+        }
+        .finalize-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(35, 134, 54, 0.4);
+        }
+        .finalize-btn:active {
+            transform: translateY(0);
+        }
+        .finalize-btn .badge {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* Context Banner */
+        .context-banner {
+            background: linear-gradient(135deg, rgba(31, 111, 235, 0.1) 0%, rgba(35, 134, 54, 0.1) 100%);
+            padding: 16px 20px;
+            border: 1px solid rgba(31, 111, 235, 0.2);
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .context-banner::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, var(--accent-blue) 0%, var(--accent-green) 100%);
+        }
+        .context-banner h3 {
+            font-size: 11px;
+            color: var(--accent-blue);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+        }
+        .context-banner .context-content {
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .context-banner .context-content p {
+            margin-bottom: 8px;
+        }
+        .context-banner .context-content p:last-child {
+            margin-bottom: 0;
+        }
+        .context-banner .context-content code {
+            background: rgba(110, 118, 129, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+            font-size: 13px;
+        }
+        .context-banner .context-content pre {
+            background: var(--bg-canvas);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin: 8px 0;
+            overflow-x: auto;
+            font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+            font-size: 12px;
+        }
+        .context-banner .context-content pre code {
+            background: none;
+            padding: 0;
+        }
+        .context-banner .context-content strong {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .context-banner .context-content em {
+            font-style: italic;
+        }
+        .context-banner .context-content ul, .context-banner .context-content ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        .context-banner .context-content li {
+            margin: 4px 0;
+        }
+        .context-banner .context-content a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+        .context-banner .context-content a:hover {
+            text-decoration: underline;
+        }
+        .context-content-wrapper {
+            position: relative;
+        }
+        .context-content-wrapper.collapsed .context-content {
+            max-height: 4.8em; /* ~3 lines at 1.6 line-height */
+            overflow: hidden;
+        }
+        .context-content-wrapper.collapsed::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2em;
+            background: linear-gradient(to bottom, transparent, rgba(31, 111, 235, 0.05));
+            pointer-events: none;
+        }
+        .context-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        .context-toggle:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        .context-toggle-icon {
+            transition: transform var(--transition-fast);
+        }
+        .context-content-wrapper:not(.collapsed) .context-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Layout */
+        .layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+        }
+
+        /* File Tree */
+        .file-tree {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-lg);
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 160px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
+        }
+        .file-tree-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-default);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--bg-secondary);
+        }
+        .file-tree-list {
+            overflow-y: auto;
+            flex: 1;
+        }
+        .file-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-muted);
+            transition: all var(--transition-fast);
+        }
+        .file-item:last-child {
+            border-bottom: none;
         }
         .file-item:hover {
-            background: #21262d;
+            background: var(--bg-hover);
         }
         .file-item.active {
-            background: #1f6feb33;
+            background: rgba(31, 111, 235, 0.15);
+            border-left: 3px solid var(--accent-blue);
+            padding-left: 13px;
         }
         .file-item .status {
-            font-size: 10px;
-            font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 3px;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 3px 6px;
+            border-radius: 4px;
             flex-shrink: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
-        .status.added { background: #238636; color: #fff; }
-        .status.modified { background: #9e6a03; color: #fff; }
-        .status.deleted { background: #da3633; color: #fff; }
-        .status.renamed { background: #58a6ff; color: #000; }
+        .status.added { background: var(--accent-green); color: #fff; }
+        .status.modified { background: var(--accent-yellow); color: #fff; }
+        .status.deleted { background: var(--accent-red); color: #fff; }
+        .status.renamed { background: var(--accent-purple); color: #fff; }
         .file-name {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            font-weight: 500;
         }
+        .file-item .comment-indicator {
+            margin-left: auto;
+            font-size: 11px;
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        /* Main Content */
         .main-content {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 6px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-lg);
             overflow: hidden;
+            box-shadow: var(--shadow-sm);
         }
         .file-header {
-            padding: 12px 16px;
-            background: #161b22;
-            border-bottom: 1px solid #30363d;
-            font-size: 14px;
+            padding: 14px 20px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-default);
+            font-size: 13px;
             font-weight: 600;
-            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+        .file-header::before {
+            content: '';
+            width: 16px;
+            height: 16px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%238b949e'%3E%3Cpath d='M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z'/%3E%3C/svg%3E") no-repeat center;
+        }
+
+        /* Diff Table */
         .diff-table {
             width: 100%;
             border-collapse: collapse;
-            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
             font-size: 12px;
             line-height: 20px;
         }
@@ -136,132 +410,144 @@
             vertical-align: top;
         }
         .hunk-header-row td {
-            background: #1f3d5c;
-            color: #79c0ff;
-            padding: 8px 10px;
+            background: rgba(31, 111, 235, 0.15);
+            color: var(--accent-blue);
+            padding: 10px 16px;
             font-size: 12px;
+            font-weight: 500;
         }
         .line-num {
-            width: 50px;
-            min-width: 50px;
-            padding: 0 10px;
+            width: 52px;
+            min-width: 52px;
+            padding: 0 12px;
             text-align: right;
-            color: #7d8590;
+            color: var(--text-muted);
             user-select: none;
-            background: #161b22;
+            background: var(--bg-primary);
             position: relative;
             cursor: pointer;
+            transition: color var(--transition-fast);
         }
         .line-num:hover {
-            color: #58a6ff;
+            color: var(--accent-blue);
         }
         .line-num .add-btn {
             position: absolute;
-            left: 4px;
+            left: 6px;
             top: 50%;
             transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
-            background: #238636;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-green);
             border: none;
-            border-radius: 3px;
+            border-radius: 4px;
             color: #fff;
             font-size: 14px;
-            line-height: 16px;
+            line-height: 18px;
             cursor: pointer;
             display: none;
             align-items: center;
             justify-content: center;
+            transition: all var(--transition-fast);
+            box-shadow: var(--shadow-sm);
         }
         .line-num:hover .add-btn {
             display: flex;
         }
         .line-num .add-btn:hover {
-            background: #2ea043;
+            background: var(--accent-green-hover);
+            transform: translateY(-50%) scale(1.1);
         }
         .line-content {
-            padding: 0 10px;
+            padding: 0 16px;
             white-space: pre-wrap;
             word-break: break-all;
         }
         .diff-row.add .line-num.new {
-            background: #12261e;
+            background: rgba(35, 134, 54, 0.15);
         }
         .diff-row.add .line-content {
-            background: #12261e;
+            background: rgba(35, 134, 54, 0.15);
             color: #7ee787;
         }
         .diff-row.remove .line-num.old {
-            background: #2d1b1e;
+            background: rgba(218, 54, 51, 0.15);
         }
         .diff-row.remove .line-content {
-            background: #2d1b1e;
+            background: rgba(218, 54, 51, 0.15);
             color: #f97583;
         }
         .diff-row.context .line-content {
-            background: #0d1117;
+            background: var(--bg-canvas);
         }
         .diff-row.context .line-num {
-            background: #0d1117;
+            background: var(--bg-canvas);
         }
-        /* Selected range highlighting */
         .diff-row.selected-range .line-content {
-            background: #1f3d5c !important;
-            border-left: 2px solid #58a6ff;
+            background: rgba(31, 111, 235, 0.2) !important;
+            border-left: 3px solid var(--accent-blue);
         }
         .diff-row.selected-range .line-num {
-            background: #1f3d5c !important;
+            background: rgba(31, 111, 235, 0.2) !important;
         }
         .shift-hint {
             font-size: 11px;
-            color: #7d8590;
+            color: var(--text-muted);
             margin-left: 8px;
             font-style: italic;
         }
-        /* Inline comment form */
+
+        /* Inline Comment Form */
         .inline-comment-row td {
-            background: #161b22;
+            background: var(--bg-primary);
             padding: 0;
         }
         .inline-comment-form {
-            margin: 0 16px 16px 16px;
-            border: 1px solid #30363d;
-            border-radius: 6px;
+            margin: 12px 20px 16px 20px;
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
             overflow: hidden;
+            box-shadow: var(--shadow-md);
         }
         .inline-comment-header {
-            background: #21262d;
-            padding: 8px 12px;
-            font-size: 12px;
-            color: #7d8590;
+            background: var(--bg-secondary);
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-weight: 500;
         }
         .inline-comment-body {
-            padding: 12px;
-            background: #0d1117;
+            padding: 16px;
+            background: var(--bg-canvas);
         }
         .inline-comment-form textarea {
             width: 100%;
             min-height: 100px;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            color: #e6edf3;
-            padding: 10px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            padding: 12px 14px;
             resize: vertical;
             font-family: inherit;
             font-size: 14px;
+            line-height: 1.5;
+            transition: all var(--transition-fast);
         }
         .inline-comment-form textarea:focus {
             outline: none;
-            border-color: #58a6ff;
-            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.2);
+        }
+        .inline-comment-form textarea::placeholder {
+            color: var(--text-muted);
         }
         .inline-comment-form .suggestion-input {
-            margin-top: 8px;
-            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            margin-top: 12px;
+            font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
             font-size: 12px;
             min-height: 80px;
         }
@@ -269,53 +555,67 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 12px;
+            margin-top: 16px;
         }
         .tag-select {
-            background: #21262d;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            color: #e6edf3;
-            padding: 6px 10px;
-            font-size: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
         }
+        .tag-select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        /* Buttons */
         .btn {
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
             border: 1px solid transparent;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
+            transition: all var(--transition-fast);
         }
         .btn-primary {
-            background: #238636;
+            background: var(--accent-green);
             color: #fff;
+            box-shadow: 0 1px 4px rgba(35, 134, 54, 0.3);
         }
         .btn-primary:hover {
-            background: #2ea043;
+            background: var(--accent-green-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(35, 134, 54, 0.4);
         }
         .btn-secondary {
-            background: #21262d;
-            border-color: #30363d;
-            color: #e6edf3;
+            background: var(--bg-secondary);
+            border-color: var(--border-default);
+            color: var(--text-primary);
         }
         .btn-secondary:hover {
-            background: #30363d;
+            background: var(--bg-tertiary);
         }
         .btn-group {
             display: flex;
             gap: 8px;
         }
-        /* Existing comment thread */
+
+        /* Comment Thread */
         .comment-thread {
-            margin: 0 16px 16px 16px;
-            border: 1px solid #30363d;
-            border-radius: 6px;
+            margin: 12px 20px 16px 20px;
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
             overflow: hidden;
+            box-shadow: var(--shadow-sm);
         }
         .comment-thread-header {
-            background: #21262d;
-            padding: 8px 12px;
+            background: var(--bg-secondary);
+            padding: 10px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -323,30 +623,31 @@
         }
         .comment-tag {
             font-size: 10px;
-            font-weight: 600;
-            padding: 2px 8px;
+            font-weight: 700;
+            padding: 3px 10px;
             border-radius: 20px;
             text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
-        .tag-question { background: #1f6feb; color: #fff; }
+        .tag-question { background: var(--accent-blue); color: #fff; }
         .tag-issue { background: #f85149; color: #fff; }
-        .tag-suggestion { background: #238636; color: #fff; }
-        .tag-praise { background: #9e6a03; color: #fff; }
-        .tag-nitpick { background: #6e7681; color: #fff; }
-        .tag-blocker { background: #da3633; color: #fff; }
+        .tag-suggestion { background: var(--accent-green); color: #fff; }
+        .tag-praise { background: var(--accent-yellow); color: #fff; }
+        .tag-nitpick { background: var(--text-muted); color: #fff; }
+        .tag-blocker { background: var(--accent-red); color: #fff; }
         .comment-thread-body {
-            padding: 12px;
-            background: #0d1117;
+            padding: 14px 16px;
+            background: var(--bg-canvas);
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
         }
         .comment-suggestion {
             margin-top: 12px;
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 10px;
-            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
             font-size: 12px;
             overflow-x: auto;
         }
@@ -357,254 +658,643 @@
         .comment-actions button {
             background: none;
             border: none;
-            color: #7d8590;
+            color: var(--text-muted);
             cursor: pointer;
             font-size: 12px;
-            padding: 2px 6px;
-            border-radius: 3px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all var(--transition-fast);
         }
         .comment-actions button:hover {
-            background: #30363d;
-            color: #e6edf3;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
         }
-        /* Submit panel */
-        .submit-panel {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 16px;
-            margin-top: 16px;
+        .line-indicator {
+            color: var(--text-muted);
+            font-size: 11px;
+            margin-left: 8px;
         }
-        .submit-panel h3 {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
+
+        /* Verdict Buttons */
         .verdict-buttons {
             display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: 10px;
+            margin-bottom: 16px;
         }
         .verdict-btn {
             flex: 1;
-            padding: 12px;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            background: #21262d;
-            color: #7d8590;
+            padding: 14px 16px;
+            border: 2px solid var(--border-default);
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
             cursor: pointer;
             text-align: center;
             font-size: 13px;
             font-weight: 600;
-            transition: all 0.15s;
+            transition: all var(--transition-fast);
         }
         .verdict-btn:hover {
-            background: #30363d;
-            color: #e6edf3;
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--text-muted);
         }
         .verdict-btn.selected {
-            border-color: #238636;
-            background: #238636;
-            color: #fff;
+            border-color: var(--accent-green);
+            background: rgba(35, 134, 54, 0.15);
+            color: #7ee787;
         }
         .verdict-btn.changes.selected {
-            border-color: #da3633;
-            background: #da3633;
+            border-color: var(--accent-red);
+            background: rgba(218, 54, 51, 0.15);
+            color: #f97583;
         }
         .verdict-btn.comment.selected {
-            border-color: #1f6feb;
-            background: #1f6feb;
+            border-color: var(--accent-blue);
+            background: rgba(31, 111, 235, 0.15);
+            color: #79c0ff;
         }
-        .submit-panel textarea {
-            width: 100%;
-            min-height: 80px;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            color: #e6edf3;
-            padding: 10px 12px;
-            margin-bottom: 12px;
-            resize: vertical;
-            font-family: inherit;
-            font-size: 14px;
-        }
+
+        /* Submit Button */
         .submit-btn {
             width: 100%;
-            padding: 12px;
-            background: #238636;
+            padding: 14px 20px;
+            background: var(--accent-green);
             color: #fff;
             border: none;
-            border-radius: 6px;
+            border-radius: var(--radius-md);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
+            transition: all var(--transition-fast);
+            box-shadow: 0 2px 8px rgba(35, 134, 54, 0.3);
         }
-        .submit-btn:hover {
-            background: #2ea043;
+        .submit-btn:hover:not(:disabled) {
+            background: var(--accent-green-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(35, 134, 54, 0.4);
         }
         .submit-btn:disabled {
-            background: #21262d;
-            color: #7d8590;
+            background: var(--bg-secondary);
+            color: var(--text-muted);
             cursor: not-allowed;
+            box-shadow: none;
         }
+
+        /* Loading & Error States */
         .loading {
-            text-align: center;
-            padding: 60px;
-            color: #7d8590;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--bg-tertiary);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         .error {
-            background: #2d1b1e;
-            border: 1px solid #da3633;
-            padding: 16px;
-            border-radius: 6px;
-            color: #f85149;
+            background: rgba(218, 54, 51, 0.1);
+            border: 1px solid var(--accent-red);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            color: #f97583;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .error::before {
+            content: '!';
+            width: 24px;
+            height: 24px;
+            background: var(--accent-red);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
         }
         #app {
             min-height: 100vh;
         }
         .empty-state {
             text-align: center;
-            padding: 60px;
-            color: #7d8590;
+            padding: 60px 20px;
+            color: var(--text-muted);
         }
-        .line-indicator {
-            color: #7d8590;
-            font-size: 11px;
+
+        /* Review Modal */
+        .review-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-normal);
         }
-        /* Chat panel */
-        .chat-panel {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            margin-top: 16px;
+        .review-modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
         }
-        .chat-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid #30363d;
+        .review-modal {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-lg);
+            width: 540px;
+            max-width: 92vw;
+            max-height: 88vh;
+            overflow: hidden;
+            transform: scale(0.95) translateY(10px);
+            transition: transform var(--transition-normal);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-lg);
+        }
+        .review-modal-overlay.open .review-modal {
+            transform: scale(1) translateY(0);
+        }
+        .review-modal-header {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #2ea043 100%);
+            padding: 18px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            cursor: pointer;
         }
-        .chat-header h3 {
-            font-size: 14px;
+        .review-modal-header h2 {
+            font-size: 16px;
             font-weight: 600;
+            color: #fff;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .review-modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+        .review-modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        .review-modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Review Summary */
+        .review-summary {
+            background: var(--bg-canvas);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            margin-bottom: 24px;
+        }
+        .review-summary-title {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 14px;
+            font-weight: 600;
+        }
+        .review-summary-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .review-summary-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .review-summary-stat .count {
+            font-weight: 700;
+        }
+        .review-summary-files {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-default);
+        }
+        .review-summary-files-title {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .review-summary-file {
+            font-size: 12px;
+            color: var(--text-primary);
+            padding: 6px 0;
+            font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .chat-header .badge {
-            background: #1f6feb;
+        .review-summary-file::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+        }
+        .review-summary-file .file-comment-count {
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        /* Chat Components */
+        .chat-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 4px 20px rgba(31, 111, 235, 0.4);
+            transition: all var(--transition-normal);
+            z-index: 1000;
+        }
+        .chat-fab:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 28px rgba(31, 111, 235, 0.5);
+        }
+        .chat-fab.open {
+            transform: rotate(90deg);
+        }
+        .chat-fab-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 22px;
+            height: 22px;
+            background: var(--accent-red);
+            border-radius: 11px;
             color: #fff;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            animation: pulse 2s infinite;
+            box-shadow: 0 2px 8px rgba(218, 54, 51, 0.4);
         }
-        .chat-toggle {
-            color: #7d8590;
-            font-size: 12px;
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
         }
-        .chat-body {
-            display: none;
-            max-height: 400px;
-            overflow-y: auto;
+        .chat-modal {
+            position: fixed;
+            bottom: 96px;
+            right: 24px;
+            width: 400px;
+            max-width: calc(100vw - 48px);
+            max-height: 520px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .chat-body.open {
-            display: block;
+        .chat-modal.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        .chat-modal-header {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-modal-header h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
         }
         .chat-messages {
+            flex: 1;
+            overflow-y: auto;
             padding: 16px;
+            min-height: 200px;
+            max-height: 320px;
+            background: var(--bg-canvas);
         }
         .chat-message {
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             display: flex;
-            gap: 8px;
+            gap: 10px;
+            animation: fadeInUp 0.3s ease;
         }
-        .chat-message.user {
-            flex-direction: row;
-        }
-        .chat-message.assistant {
-            flex-direction: row;
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .chat-avatar {
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 14px;
             flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
         }
         .chat-message.user .chat-avatar {
-            background: #1f6feb;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #58a6ff 100%);
         }
         .chat-message.assistant .chat-avatar {
-            background: #238636;
+            background: linear-gradient(135deg, var(--accent-green) 0%, #3fb950 100%);
         }
         .chat-bubble {
-            background: #21262d;
+            background: var(--bg-secondary);
             padding: 10px 14px;
-            border-radius: 12px;
+            border-radius: 14px;
+            border-top-left-radius: 4px;
             font-size: 13px;
             line-height: 1.5;
             max-width: 85%;
+            box-shadow: var(--shadow-sm);
         }
         .chat-message.user .chat-bubble {
-            background: #1f3d5c;
+            background: rgba(31, 111, 235, 0.2);
+            border-top-left-radius: 14px;
+            border-top-right-radius: 4px;
         }
-        .chat-context {
+        .chat-code-ref {
+            display: inline-block;
+            background: var(--bg-canvas);
+            border: 1px solid var(--border-default);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
             font-size: 11px;
-            color: #7d8590;
-            margin-bottom: 4px;
+            color: var(--accent-blue);
+            margin-bottom: 6px;
         }
         .chat-status {
             font-size: 11px;
-            margin-top: 4px;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .chat-status.pending {
-            color: #f0883e;
+        .chat-status.pending { color: #f0883e; }
+        .chat-status.processing { color: var(--accent-blue); }
+        .chat-status.error { color: #f85149; }
+        .typing-indicator {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 16px;
         }
-        .chat-status.processing {
-            color: #58a6ff;
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            background: currentColor;
+            border-radius: 50%;
+            animation: typing-bounce 1.2s infinite ease-in-out;
         }
-        .chat-status.error {
-            color: #f85149;
+        .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes typing-bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+        .chat-input-wrapper {
+            padding: 14px 16px;
+            border-top: 1px solid var(--border-default);
+            background: var(--bg-primary);
+        }
+        .chat-code-context {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: rgba(31, 111, 235, 0.1);
+            border: 1px solid rgba(31, 111, 235, 0.2);
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+        }
+        .chat-code-context-label {
+            color: var(--text-muted);
+        }
+        .chat-code-context-value {
+            flex: 1;
+            font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+            color: var(--accent-blue);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .chat-code-context-clear {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all var(--transition-fast);
+        }
+        .chat-code-context-clear:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
         }
         .chat-input-area {
-            padding: 12px 16px;
-            border-top: 1px solid #30363d;
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
         .chat-input-area input {
             flex: 1;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            color: #e6edf3;
-            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: 20px;
+            color: var(--text-primary);
+            padding: 10px 16px;
             font-size: 13px;
+            transition: all var(--transition-fast);
         }
         .chat-input-area input:focus {
             outline: none;
-            border-color: #58a6ff;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.15);
         }
         .chat-input-area input::placeholder {
-            color: #7d8590;
+            color: var(--text-muted);
+        }
+        .chat-input-area .btn-primary {
+            border-radius: 20px;
+            padding: 10px 18px;
         }
         .chat-empty {
             text-align: center;
-            padding: 24px;
-            color: #7d8590;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+        .chat-empty-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+        .chat-empty p {
+            margin: 0;
             font-size: 13px;
+        }
+        .chat-empty .chat-empty-hint {
+            margin-top: 8px;
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        /* Line chat button */
+        .line-num .chat-btn {
+            position: absolute;
+            left: 28px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background: var(--accent-blue);
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 11px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+            box-shadow: var(--shadow-sm);
+        }
+        .line-num:hover .chat-btn {
+            display: flex;
+        }
+        .line-num .chat-btn:hover {
+            background: var(--accent-blue-hover);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* Success State */
+        .success-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--accent-green) 0%, #2ea043 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 24px;
+            box-shadow: 0 8px 32px rgba(35, 134, 54, 0.4);
+            animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .success-state h1 {
+            color: #7ee787;
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        .success-state p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+        .success-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 20px 28px;
+            display: inline-block;
+            text-align: left;
+        }
+        .success-card-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+        .success-card-row:not(:last-child) {
+            border-bottom: 1px solid var(--border-muted);
+        }
+        .success-card-label {
+            color: var(--text-secondary);
+        }
+        .success-card-value {
+            color: var(--text-primary);
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
     <div id="app">
         <div class="container">
-            <div class="loading">Loading review...</div>
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <span>Loading review...</span>
+            </div>
         </div>
     </div>
 
@@ -620,37 +1310,49 @@
                 summaryNote: '',
                 loading: true,
                 error: null,
-                activeCommentLine: null, // { startLine, endLine, side } - Track which lines have the comment form open
-                pendingLineStart: null,  // For shift+click range selection
+                activeCommentLine: null,
+                pendingLineStart: null,
                 chatMessages: [],
                 chatOpen: false,
                 chatPolling: null,
-                hasPendingChat: false
+                hasPendingChat: false,
+                chatEnabled: true,
+                chatCodeContext: null,
+                reviewModalOpen: false,
+                contextExpanded: false
             },
 
             async init() {
                 try {
-                    const [diffRes, contextRes, commentsRes, chatRes] = await Promise.all([
+                    const [diffRes, contextRes, commentsRes, configRes] = await Promise.all([
                         fetch('/api/diff'),
                         fetch('/api/context'),
                         fetch('/api/comments'),
-                        fetch('/api/chat')
+                        fetch('/api/config')
                     ]);
 
                     this.state.diff = await diffRes.json();
                     this.state.context = (await contextRes.json()).context;
                     this.state.comments = (await commentsRes.json()).comments;
-                    const chatData = await chatRes.json();
-                    this.state.chatMessages = chatData.messages || [];
-                    this.state.hasPendingChat = chatData.has_pending || false;
+                    const configData = await configRes.json();
+                    this.state.chatEnabled = configData.chat_enabled !== false;
+
+                    if (this.state.chatEnabled) {
+                        const chatRes = await fetch('/api/chat');
+                        const chatData = await chatRes.json();
+                        this.state.chatMessages = chatData.messages || [];
+                        this.state.hasPendingChat = chatData.has_pending || false;
+                    }
+
                     this.state.loading = false;
 
                     if (this.state.diff.files && this.state.diff.files.length > 0) {
                         this.state.selectedFile = this.state.diff.files[0].path;
                     }
 
-                    // Start polling for chat updates if there are pending questions
-                    this.startChatPolling();
+                    if (this.state.chatEnabled) {
+                        this.startChatPolling();
+                    }
 
                     this.render();
                 } catch (e) {
@@ -661,7 +1363,6 @@
             },
 
             startChatPolling() {
-                // Poll every 3 seconds when we have pending questions
                 if (this.state.chatPolling) clearInterval(this.state.chatPolling);
                 this.state.chatPolling = setInterval(async () => {
                     if (this.state.hasPendingChat) {
@@ -674,9 +1375,18 @@
                 try {
                     const chatRes = await fetch('/api/chat');
                     const chatData = await chatRes.json();
-                    this.state.chatMessages = chatData.messages || [];
-                    this.state.hasPendingChat = chatData.has_pending || false;
-                    this.render();
+                    const newMessages = chatData.messages || [];
+                    const newHasPending = chatData.has_pending || false;
+
+                    // Only re-render if something changed
+                    const messagesChanged = JSON.stringify(newMessages) !== JSON.stringify(this.state.chatMessages);
+                    const pendingChanged = newHasPending !== this.state.hasPendingChat;
+
+                    if (messagesChanged || pendingChanged) {
+                        this.state.chatMessages = newMessages;
+                        this.state.hasPendingChat = newHasPending;
+                        this.render();
+                    }
                 } catch (e) {
                     console.error('Failed to refresh chat:', e);
                 }
@@ -685,13 +1395,39 @@
             toggleChat() {
                 this.state.chatOpen = !this.state.chatOpen;
                 this.render();
-                // Scroll to bottom of chat when opening
                 if (this.state.chatOpen) {
                     setTimeout(() => {
-                        const chatBody = document.getElementById('chatBody');
-                        if (chatBody) chatBody.scrollTop = chatBody.scrollHeight;
-                    }, 0);
+                        const chatMessages = document.querySelector('.chat-messages');
+                        if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+                        const input = document.getElementById('chatInput');
+                        if (input) input.focus();
+                    }, 100);
                 }
+            },
+
+            setChatCodeContext(filePath, startLine, endLine, event) {
+                if (event) event.stopPropagation();
+                this.state.chatCodeContext = { file: filePath, startLine, endLine };
+                this.state.chatOpen = true;
+                this.render();
+                setTimeout(() => {
+                    const input = document.getElementById('chatInput');
+                    if (input) input.focus();
+                }, 100);
+            },
+
+            clearChatCodeContext() {
+                this.state.chatCodeContext = null;
+                this.render();
+            },
+
+            formatCodeRef(ctx) {
+                if (!ctx) return '';
+                const fileName = ctx.file.split('/').pop();
+                const lineRef = ctx.startLine === ctx.endLine
+                    ? `L${ctx.startLine}`
+                    : `L${ctx.startLine}-${ctx.endLine}`;
+                return `${fileName}::${lineRef}`;
             },
 
             async sendChatMessage() {
@@ -699,18 +1435,26 @@
                 const content = input.value.trim();
                 if (!content) return;
 
+                let fullContent = content;
+                if (this.state.chatCodeContext) {
+                    const ref = this.formatCodeRef(this.state.chatCodeContext);
+                    fullContent = `[${ref}] ${content}`;
+                }
+
                 try {
                     const res = await fetch('/api/chat', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            content: content,
-                            file_context: this.state.selectedFile
+                            content: fullContent,
+                            file_context: this.state.chatCodeContext?.file || this.state.selectedFile,
+                            line_context: this.state.chatCodeContext?.startLine || null
                         })
                     });
 
                     if ((await res.json()).success) {
                         input.value = '';
+                        this.state.chatCodeContext = null;
                         await this.refreshChat();
                     }
                 } catch (e) {
@@ -730,20 +1474,137 @@
                 this.render();
             },
 
+            toggleReviewModal() {
+                this.state.reviewModalOpen = !this.state.reviewModalOpen;
+                this.render();
+            },
+
+            toggleContextExpand() {
+                this.state.contextExpanded = !this.state.contextExpanded;
+                this.render();
+            },
+
+            isContextLong() {
+                // Check if context has more than 3 lines worth of content
+                const ctx = this.state.context;
+                if (!ctx) return false;
+                // Count newlines and estimate line wraps (rough heuristic)
+                const lines = ctx.split('\n').length;
+                const longLines = ctx.split('\n').filter(l => l.length > 80).length;
+                return lines > 3 || (lines + longLines) > 3;
+            },
+
+            getCommentStats() {
+                const comments = this.state.comments;
+                const byTag = {};
+                const byFile = {};
+
+                comments.forEach(c => {
+                    byTag[c.tag] = (byTag[c.tag] || 0) + 1;
+                    byFile[c.file_path] = (byFile[c.file_path] || 0) + 1;
+                });
+
+                return { total: comments.length, byTag, byFile };
+            },
+
+            getFileCommentCount(filePath) {
+                return this.state.comments.filter(c => c.file_path === filePath).length;
+            },
+
+            renderReviewModal() {
+                const stats = this.getCommentStats();
+
+                const tagConfig = {
+                    blocker: { label: 'Blockers', color: 'var(--accent-red)' },
+                    issue: { label: 'Issues', color: '#f85149' },
+                    suggestion: { label: 'Suggestions', color: 'var(--accent-green)' },
+                    question: { label: 'Questions', color: 'var(--accent-blue)' },
+                    nitpick: { label: 'Nitpicks', color: 'var(--text-muted)' },
+                    praise: { label: 'Praise', color: 'var(--accent-yellow)' }
+                };
+
+                let statsHtml = '';
+                if (stats.total > 0) {
+                    statsHtml = '<div class="review-summary-stats">';
+                    statsHtml += `<span class="review-summary-stat"><span class="count">${stats.total}</span> comment${stats.total !== 1 ? 's' : ''}</span>`;
+
+                    Object.entries(tagConfig).forEach(([tag, config]) => {
+                        const count = stats.byTag[tag] || 0;
+                        if (count > 0) {
+                            statsHtml += `<span class="review-summary-stat" style="border-left: 3px solid ${config.color};">
+                                <span class="count">${count}</span> ${config.label.toLowerCase()}
+                            </span>`;
+                        }
+                    });
+                    statsHtml += '</div>';
+
+                    statsHtml += '<div class="review-summary-files">';
+                    statsHtml += '<div class="review-summary-files-title">Files with comments</div>';
+                    Object.entries(stats.byFile).forEach(([file, count]) => {
+                        const fileName = file.split('/').pop();
+                        statsHtml += `<div class="review-summary-file">
+                            <span>${this.escapeHtml(fileName)}</span>
+                            <span class="file-comment-count">${count}</span>
+                        </div>`;
+                    });
+                    statsHtml += '</div>';
+                } else {
+                    statsHtml = '<div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 12px 0;">No comments added yet</div>';
+                }
+
+                return `
+                    <div class="review-modal-overlay ${this.state.reviewModalOpen ? 'open' : ''}" onclick="if(event.target === this) App.toggleReviewModal()">
+                        <div class="review-modal">
+                            <div class="review-modal-header">
+                                <h2>Finalize Review</h2>
+                                <button class="review-modal-close" onclick="App.toggleReviewModal()">✕</button>
+                            </div>
+                            <div class="review-modal-body">
+                                <div class="review-summary">
+                                    <div class="review-summary-title">Review Summary</div>
+                                    ${statsHtml}
+                                </div>
+
+                                <div class="review-summary-title" style="margin-bottom: 12px;">Select Verdict</div>
+                                <div class="verdict-buttons">
+                                    <button class="verdict-btn ${this.state.verdict === 'approved' ? 'selected' : ''}"
+                                            onclick="App.setVerdict('approved')">
+                                        ✓ Approve
+                                    </button>
+                                    <button class="verdict-btn changes ${this.state.verdict === 'changes_requested' ? 'selected' : ''}"
+                                            onclick="App.setVerdict('changes_requested')">
+                                        ✗ Changes
+                                    </button>
+                                    <button class="verdict-btn comment ${this.state.verdict === 'comment' ? 'selected' : ''}"
+                                            onclick="App.setVerdict('comment')">
+                                        💬 Comment
+                                    </button>
+                                </div>
+
+                                <textarea id="summaryNoteModal" placeholder="Add a summary note (optional)..."
+                                          style="width: 100%; min-height: 80px; background: var(--bg-canvas); border: 1px solid var(--border-default); border-radius: var(--radius-sm); color: var(--text-primary); padding: 12px 14px; margin: 16px 0; resize: vertical; font-family: inherit; font-size: 14px; line-height: 1.5;"
+                                          oninput="App.state.summaryNote = this.value">${this.escapeHtml(this.state.summaryNote)}</textarea>
+
+                                <button class="submit-btn" onclick="App.submit()" ${!this.state.verdict ? 'disabled' : ''}>
+                                    Submit Review${stats.total > 0 ? ` with ${stats.total} Comment${stats.total !== 1 ? 's' : ''}` : ''}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
             openCommentForm(lineNumber, side, event) {
-                // If shift is held and we have a pending start, create a range
                 if (event && event.shiftKey && this.state.pendingLineStart !== null) {
                     const startLine = Math.min(this.state.pendingLineStart, lineNumber);
                     const endLine = Math.max(this.state.pendingLineStart, lineNumber);
                     this.state.activeCommentLine = { startLine, endLine, side };
                     this.state.pendingLineStart = null;
                 } else {
-                    // Single line or start of a new range
                     this.state.activeCommentLine = { startLine: lineNumber, endLine: lineNumber, side };
                     this.state.pendingLineStart = lineNumber;
                 }
                 this.render();
-                // Focus the textarea after render
                 setTimeout(() => {
                     const textarea = document.getElementById('inlineCommentBody');
                     if (textarea) textarea.focus();
@@ -806,21 +1667,23 @@
                 });
 
                 if ((await res.json()).success) {
+                    const verdictDisplay = this.state.verdict === 'changes_requested' ? 'Changes Requested' :
+                                          this.state.verdict.charAt(0).toUpperCase() + this.state.verdict.slice(1);
                     document.getElementById('app').innerHTML = `
                         <div class="container">
-                            <div style="text-align: center; padding: 100px 20px;">
-                                <div style="font-size: 64px; margin-bottom: 20px;">✓</div>
-                                <h1 style="color: #238636; margin-bottom: 16px;">Review Submitted</h1>
-                                <p style="color: #7d8590; margin-bottom: 24px;">
-                                    You can close this window. The agent will receive your feedback.
-                                </p>
-                                <div style="background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 16px; display: inline-block;">
-                                    <p style="color: #e6edf3; margin-bottom: 8px;">
-                                        Verdict: <strong>${this.state.verdict.replace('_', ' ')}</strong>
-                                    </p>
-                                    <p style="color: #7d8590;">
-                                        ${this.state.comments.length} comment${this.state.comments.length !== 1 ? 's' : ''}
-                                    </p>
+                            <div class="success-state">
+                                <div class="success-icon">✓</div>
+                                <h1>Review Submitted</h1>
+                                <p>You can close this window. The agent will receive your feedback.</p>
+                                <div class="success-card">
+                                    <div class="success-card-row">
+                                        <span class="success-card-label">Verdict</span>
+                                        <span class="success-card-value">${verdictDisplay}</span>
+                                    </div>
+                                    <div class="success-card-row">
+                                        <span class="success-card-label">Comments</span>
+                                        <span class="success-card-value">${this.state.comments.length}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -832,66 +1695,130 @@
                 return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
             },
 
+            renderMarkdown(str) {
+                if (!str) return '';
+                let html = this.escapeHtml(str);
+
+                // Code blocks (```...```)
+                html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+                    return `<pre><code>${code.trim()}</code></pre>`;
+                });
+
+                // Inline code (`...`)
+                html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+                // Bold (**...**)
+                html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+                // Italic (*...*)
+                html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+                // Links [text](url)
+                html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+                // Unordered lists (- item)
+                html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+                html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+
+                // Paragraphs (double newline)
+                html = html.split(/\n\n+/).map(p => {
+                    p = p.trim();
+                    if (!p) return '';
+                    if (p.startsWith('<pre>') || p.startsWith('<ul>') || p.startsWith('<ol>')) return p;
+                    return `<p>${p}</p>`;
+                }).join('');
+
+                // Single newlines to <br> within paragraphs
+                html = html.replace(/<p>([^<]*)\n([^<]*)<\/p>/g, '<p>$1<br>$2</p>');
+
+                return html;
+            },
+
             renderChatPanel() {
+                if (!this.state.chatEnabled) {
+                    return '';
+                }
+
                 const pendingCount = this.state.chatMessages.filter(m => m.role === 'user' && m.status === 'pending').length;
                 const processingCount = this.state.chatMessages.filter(m => m.role === 'user' && m.status === 'processing').length;
                 const totalMessages = this.state.chatMessages.length;
+                const badgeCount = pendingCount + processingCount;
 
                 let messagesHtml = '';
                 if (totalMessages === 0) {
                     messagesHtml = `<div class="chat-empty">
-                        <p>💬 Ask the agent questions about the code changes</p>
-                        <p style="margin-top: 8px; font-size: 11px;">Questions will be answered when the agent calls self-review-chat</p>
+                        <div class="chat-empty-icon">💬</div>
+                        <p>Ask the agent questions about the code</p>
+                        <p class="chat-empty-hint">Click 💬 on any line to reference code</p>
                     </div>`;
                 } else {
                     this.state.chatMessages.forEach(msg => {
                         const isUser = msg.role === 'user';
                         const avatar = isUser ? '👤' : '🤖';
-                        let contextHtml = '';
-                        if (msg.file_context) {
-                            contextHtml = `<div class="chat-context">
-                                📁 ${this.escapeHtml(msg.file_context)}${msg.line_context ? `:${msg.line_context}` : ''}
-                            </div>`;
+
+                        let codeRefHtml = '';
+                        let displayContent = msg.content;
+                        const refMatch = msg.content.match(/^\[([^\]]+::[L\d-]+)\]\s*/);
+                        if (refMatch) {
+                            codeRefHtml = `<div class="chat-code-ref">📍 ${this.escapeHtml(refMatch[1])}</div>`;
+                            displayContent = msg.content.substring(refMatch[0].length);
                         }
+
                         let statusHtml = '';
                         if (isUser && msg.status === 'pending') {
-                            statusHtml = '<div class="chat-status pending">⏳ Waiting for agent...</div>';
+                            statusHtml = `<div class="chat-status pending">
+                                <div class="typing-indicator"><span></span><span></span><span></span></div>
+                                Waiting for agent...
+                            </div>`;
                         } else if (isUser && msg.status === 'processing') {
-                            statusHtml = '<div class="chat-status processing">🔄 Agent is responding...</div>';
+                            statusHtml = `<div class="chat-status processing">
+                                <div class="typing-indicator"><span></span><span></span><span></span></div>
+                                Agent responding...
+                            </div>`;
                         } else if (msg.status === 'error') {
                             statusHtml = `<div class="chat-status error">❌ ${this.escapeHtml(msg.error_message || 'Error')}</div>`;
                         }
                         messagesHtml += `<div class="chat-message ${msg.role}">
                             <div class="chat-avatar">${avatar}</div>
                             <div>
-                                ${contextHtml}
-                                <div class="chat-bubble">${this.escapeHtml(msg.content)}</div>
+                                ${codeRefHtml}
+                                <div class="chat-bubble">${this.escapeHtml(displayContent)}</div>
                                 ${statusHtml}
                             </div>
                         </div>`;
                     });
                 }
 
-                let badgeHtml = '';
-                if (pendingCount > 0) {
-                    badgeHtml = `<span class="badge">${pendingCount} pending</span>`;
-                } else if (processingCount > 0) {
-                    badgeHtml = `<span class="badge" style="background: #58a6ff;">processing...</span>`;
+                let codeContextHtml = '';
+                if (this.state.chatCodeContext) {
+                    const ref = this.formatCodeRef(this.state.chatCodeContext);
+                    codeContextHtml = `
+                        <div class="chat-code-context">
+                            <span class="chat-code-context-label">📍 Referencing:</span>
+                            <span class="chat-code-context-value">${this.escapeHtml(ref)}</span>
+                            <button class="chat-code-context-clear" onclick="App.clearChatCodeContext()" title="Clear reference">✕</button>
+                        </div>
+                    `;
                 }
 
                 return `
-                    <div class="chat-panel">
-                        <div class="chat-header" onclick="App.toggleChat()">
-                            <h3>💬 Ask the Agent ${badgeHtml}</h3>
-                            <span class="chat-toggle">${this.state.chatOpen ? '▼ Hide' : '▶ Show'}</span>
+                    <button class="chat-fab ${this.state.chatOpen ? 'open' : ''}" onclick="App.toggleChat()" title="Ask the Agent">
+                        ${this.state.chatOpen ? '✕' : '💬'}
+                        ${badgeCount > 0 ? `<span class="chat-fab-badge">${badgeCount}</span>` : ''}
+                    </button>
+                    <div class="chat-modal ${this.state.chatOpen ? 'open' : ''}">
+                        <div class="chat-modal-header">
+                            <h3>💬 Ask the Agent</h3>
+                            <button class="chat-modal-close" onclick="App.toggleChat()">✕</button>
                         </div>
-                        <div id="chatBody" class="chat-body ${this.state.chatOpen ? 'open' : ''}">
-                            <div class="chat-messages">
-                                ${messagesHtml}
-                            </div>
+                        <div class="chat-messages">
+                            ${messagesHtml}
+                        </div>
+                        <div class="chat-input-wrapper">
+                            ${codeContextHtml}
                             <div class="chat-input-area">
                                 <input type="text" id="chatInput"
-                                       placeholder="Ask a question about the code changes..."
+                                       placeholder="${this.state.chatCodeContext ? 'Ask about this code...' : 'Ask a question...'}"
                                        onkeypress="if(event.key === 'Enter') App.sendChatMessage()">
                                 <button class="btn btn-primary" onclick="App.sendChatMessage()">Send</button>
                             </div>
@@ -906,7 +1833,6 @@
                 }
 
                 const fileComments = this.state.comments.filter(c => c.file_path === this.state.selectedFile);
-                // Group comments by their end_line (where they should be displayed)
                 const commentsByLine = {};
                 fileComments.forEach(c => {
                     const key = `${c.end_line}-${c.side}`;
@@ -917,7 +1843,6 @@
                 let html = '<table class="diff-table">';
 
                 file.hunks.forEach(hunk => {
-                    // Hunk header row
                     html += `<tr class="hunk-header-row">
                         <td colspan="4">@@ -${hunk.oldStart},${hunk.oldCount} +${hunk.newStart},${hunk.newCount} @@</td>
                     </tr>`;
@@ -928,7 +1853,6 @@
                         const lineNum = line.type === 'remove' ? line.oldLine : line.newLine;
                         const side = line.type === 'remove' ? 'old' : 'new';
 
-                        // Check if this line is in the selected range for highlighting
                         const isInRange = this.state.activeCommentLine &&
                             this.state.activeCommentLine.side === side &&
                             lineNum >= this.state.activeCommentLine.startLine &&
@@ -938,12 +1862,12 @@
                             <td class="line-num old">${line.oldLine || ''}</td>
                             <td class="line-num new" onclick="App.openCommentForm(${lineNum}, '${side}', event)">
                                 <button class="add-btn" title="Add comment (Shift+click for range)">+</button>
+                                <button class="chat-btn" onclick="App.setChatCodeContext('${this.escapeHtml(this.state.selectedFile)}', ${lineNum}, ${lineNum}, event)" title="Ask about this line">💬</button>
                                 ${line.newLine || ''}
                             </td>
                             <td class="line-content">${prefix}${this.escapeHtml(line.content)}</td>
                         </tr>`;
 
-                        // Check for existing comments on this line (displayed at end_line)
                         const commentsOnLine = commentsByLine[`${lineNum}-${side}`] || [];
                         commentsOnLine.forEach(comment => {
                             const lineRange = comment.start_line === comment.end_line
@@ -970,7 +1894,6 @@
                             </tr>`;
                         });
 
-                        // Show comment form at the end of the selected range
                         if (this.state.activeCommentLine &&
                             this.state.activeCommentLine.endLine === lineNum &&
                             this.state.activeCommentLine.side === side) {
@@ -985,11 +1908,11 @@
                                 <td colspan="3">
                                     <div class="inline-comment-form">
                                         <div class="inline-comment-header">
-                                            <span>Add a comment on ${lineLabel} ${shiftHint}</span>
+                                            <span>Comment on ${lineLabel} ${shiftHint}</span>
                                             <button class="btn btn-secondary" onclick="App.closeCommentForm()">Cancel</button>
                                         </div>
                                         <div class="inline-comment-body">
-                                            <textarea id="inlineCommentBody" placeholder="Leave a comment..."></textarea>
+                                            <textarea id="inlineCommentBody" placeholder="Write your comment..."></textarea>
                                             <textarea id="inlineSuggestion" class="suggestion-input" placeholder="Suggested code (optional)..."></textarea>
                                             <div class="inline-comment-actions">
                                                 <select id="inlineTag" class="tag-select">
@@ -1027,42 +1950,73 @@
                 const app = document.getElementById('app');
 
                 if (this.state.loading) {
-                    app.innerHTML = '<div class="container"><div class="loading">Loading review...</div></div>';
+                    app.innerHTML = `<div class="container">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <span>Loading review...</span>
+                        </div>
+                    </div>`;
                     return;
                 }
 
                 if (this.state.error) {
-                    app.innerHTML = `<div class="container"><div class="error">Error: ${this.escapeHtml(this.state.error)}</div></div>`;
+                    app.innerHTML = `<div class="container"><div class="error">${this.escapeHtml(this.state.error)}</div></div>`;
                     return;
                 }
 
                 const files = this.state.diff?.files || [];
                 const selectedFile = files.find(f => f.path === this.state.selectedFile);
+                const commentCount = this.state.comments.length;
 
                 app.innerHTML = `
                     <div class="container">
                         <header>
-                            <h1>Self-Review</h1>
-                            <span class="file-count">${files.length} file${files.length !== 1 ? 's' : ''} changed</span>
+                            <div class="header-left">
+                                <div class="logo">
+                                    <div class="logo-icon">📝</div>
+                                    <h1>Self-Review</h1>
+                                </div>
+                            </div>
+                            <div class="header-right">
+                                <span class="file-count">${files.length} file${files.length !== 1 ? 's' : ''} changed</span>
+                                <button class="finalize-btn" onclick="App.toggleReviewModal()">
+                                    ✓ Finalize Review
+                                    ${commentCount > 0 ? `<span class="badge">${commentCount}</span>` : ''}
+                                </button>
+                            </div>
                         </header>
 
                         ${this.state.context ? `
                             <div class="context-banner">
                                 <h3>Agent Context</h3>
-                                <p>${this.escapeHtml(this.state.context)}</p>
+                                <div class="context-content-wrapper ${this.isContextLong() && !this.state.contextExpanded ? 'collapsed' : ''}">
+                                    <div class="context-content">${this.renderMarkdown(this.state.context)}</div>
+                                </div>
+                                ${this.isContextLong() ? `
+                                    <button class="context-toggle" onclick="App.toggleContextExpand()">
+                                        <span class="context-toggle-icon">▼</span>
+                                        ${this.state.contextExpanded ? 'Show less' : 'Show more'}
+                                    </button>
+                                ` : ''}
                             </div>
                         ` : ''}
 
                         <div class="layout">
                             <div class="file-tree">
                                 <div class="file-tree-header">Files</div>
-                                ${files.map(f => `
-                                    <div class="file-item ${f.path === this.state.selectedFile ? 'active' : ''}"
-                                         onclick="App.selectFile('${this.escapeHtml(f.path)}')">
-                                        <span class="status ${f.status}">${f.status.charAt(0).toUpperCase()}</span>
-                                        <span class="file-name" title="${this.escapeHtml(f.path)}">${f.path.split('/').pop()}</span>
-                                    </div>
-                                `).join('')}
+                                <div class="file-tree-list">
+                                    ${files.map(f => {
+                                        const fileCommentCount = this.getFileCommentCount(f.path);
+                                        return `
+                                            <div class="file-item ${f.path === this.state.selectedFile ? 'active' : ''}"
+                                                 onclick="App.selectFile('${this.escapeHtml(f.path)}')">
+                                                <span class="status ${f.status}">${f.status.charAt(0).toUpperCase()}</span>
+                                                <span class="file-name" title="${this.escapeHtml(f.path)}">${f.path.split('/').pop()}</span>
+                                                ${fileCommentCount > 0 ? `<span class="comment-indicator">${fileCommentCount}</span>` : ''}
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
                             </div>
 
                             <div class="main-content">
@@ -1070,32 +2024,9 @@
                                 ${this.renderDiffTable(selectedFile)}
                             </div>
                         </div>
-
-                        ${this.renderChatPanel()}
-
-                        <div class="submit-panel">
-                            <h3>Finish your review</h3>
-                            <div class="verdict-buttons">
-                                <button class="verdict-btn ${this.state.verdict === 'approved' ? 'selected' : ''}"
-                                        onclick="App.setVerdict('approved')">
-                                    ✓ Approve
-                                </button>
-                                <button class="verdict-btn changes ${this.state.verdict === 'changes_requested' ? 'selected' : ''}"
-                                        onclick="App.setVerdict('changes_requested')">
-                                    ✗ Request Changes
-                                </button>
-                                <button class="verdict-btn comment ${this.state.verdict === 'comment' ? 'selected' : ''}"
-                                        onclick="App.setVerdict('comment')">
-                                    💬 Comment
-                                </button>
-                            </div>
-                            <textarea id="summaryNote" placeholder="Leave a summary comment (optional)..."
-                                      oninput="App.state.summaryNote = this.value">${this.escapeHtml(this.state.summaryNote)}</textarea>
-                            <button class="submit-btn" onclick="App.submit()" ${!this.state.verdict ? 'disabled' : ''}>
-                                Submit review${this.state.comments.length > 0 ? ` (${this.state.comments.length} comment${this.state.comments.length !== 1 ? 's' : ''})` : ''}
-                            </button>
-                        </div>
                     </div>
+                    ${this.renderReviewModal()}
+                    ${this.renderChatPanel()}
                 `;
             }
         };

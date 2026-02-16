@@ -30,7 +30,7 @@ class ReviewSessionFactory
     ) {
     }
 
-    public function create(DiffResult $diff, ?string $context = null): ReviewSession
+    public function create(DiffResult $diff, ?string $context = null, bool $chatEnabled = true): ReviewSession
     {
         $sessionId = $this->generateSessionId();
         $port = $this->findFreePort();
@@ -45,6 +45,7 @@ class ReviewSessionFactory
             diff: $diff,
             filePaths: $diff->getFilePaths(),
             context: $context,
+            chatEnabled: $chatEnabled,
         );
     }
 

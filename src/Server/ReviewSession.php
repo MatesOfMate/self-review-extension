@@ -40,6 +40,7 @@ class ReviewSession
         private readonly DiffResult $diff,
         private readonly array $filePaths,
         private readonly ?string $context = null,
+        private readonly bool $chatEnabled = true,
     ) {
         $this->createdAt = time();
         $this->database->createSession($this->id, $this->diff, $this->context);
@@ -100,6 +101,11 @@ class ReviewSession
         return $this->context;
     }
 
+    public function isChatEnabled(): bool
+    {
+        return $this->chatEnabled;
+    }
+
     public function isExpired(): bool
     {
         return (time() - $this->createdAt) > self::TTL_SECONDS;
@@ -129,6 +135,7 @@ class ReviewSession
         ], $this->publicDir, [
             'SELF_REVIEW_SESSION_ID' => $this->id,
             'SELF_REVIEW_DB_PATH' => \sprintf('%s/self-review-%s.sqlite', sys_get_temp_dir(), $this->id),
+            'SELF_REVIEW_CHAT_ENABLED' => $this->chatEnabled ? 'true' : 'false',
         ]);
 
         $this->serverProcess->setTimeout(null);

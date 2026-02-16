@@ -19,9 +19,6 @@ use MatesOfMate\SelfReviewExtension\Server\ReviewSessionFactory;
 use MatesOfMate\SelfReviewExtension\Storage\DatabaseFactory;
 use Mcp\Capability\Attribute\McpTool;
 use Mcp\Capability\Attribute\Schema;
-use Mcp\Exception\ClientException;
-use Mcp\Schema\Content\TextContent;
-use Mcp\Server\RequestContext;
 
 /**
  * Human-in-the-loop code review tool with two non-blocking MCP methods.
@@ -133,15 +130,22 @@ class SelfReviewTool
 
     #[McpTool(
         name: 'self-review-result',
-        description: 'Check if a human review session is complete and get the results. Returns either "waiting" status if review is not done, or the complete review with verdict and comments. Call this periodically or after user indicates they are done reviewing.'
+        description: 'Check if a human review session is complete and get the results. Polls for events (review submitted or new chat questions) until timeout. Returns review results, pending questions requiring answers, or waiting status.'
     )]
     public function result(
         #[Schema(
             description: 'Session ID returned by self-review-start'
         )]
         string $session_id,
+        #[Schema(
+            description: 'Maximum seconds to wait for events (review submission or new questions). Default 60, max 300.'
+        )]
+        int $timeout = 60,
     ): string {
         try {
+            // Clamp timeout to reasonable bounds
+            $timeout = max(1, min(300, $timeout));
+
             // Check if session exists
             if (!isset(self::$sessions[$session_id])) {
                 return $this->getFormatter()->formatError(
@@ -151,48 +155,65 @@ class SelfReviewTool
             }
 
             $session = self::$sessions[$session_id];
+            $database = $session->getDatabase();
+            $startTime = time();
 
-            // Check if session expired
-            if ($session->isExpired()) {
-                $session->shutdown();
-                unset(self::$sessions[$session_id]);
+            // Poll for events until timeout
+            while ((time() - $startTime) < $timeout) {
+                // Check if session expired
+                if ($session->isExpired()) {
+                    $session->shutdown();
+                    unset(self::$sessions[$session_id]);
 
-                return $this->getFormatter()->formatError(
-                    'Session expired (TTL: 1 hour)',
-                    $session_id
-                );
+                    return $this->getFormatter()->formatError(
+                        'Session expired (TTL: 1 hour)',
+                        $session_id
+                    );
+                }
+
+                // Check if server is still running
+                if (!$session->isRunning()) {
+                    unset(self::$sessions[$session_id]);
+
+                    return $this->getFormatter()->formatError(
+                        'Review server stopped unexpectedly',
+                        $session_id
+                    );
+                }
+
+                // Check if review was submitted
+                if ($session->isSubmitted()) {
+                    $result = $session->collectResult();
+
+                    if (null === $result) {
+                        return $this->getFormatter()->formatError(
+                            'Failed to collect review results',
+                            $session_id
+                        );
+                    }
+
+                    // Cleanup session
+                    $session->shutdown();
+                    unset(self::$sessions[$session_id]);
+
+                    return $this->getFormatter()->formatResult($result);
+                }
+
+                // Check for pending questions
+                $questions = $database->getPendingQuestions($session_id);
+                if ([] !== $questions) {
+                    return $this->getFormatter()->formatWaitingWithQuestions(
+                        $session,
+                        $questions
+                    );
+                }
+
+                // Sleep before next poll (1 second)
+                usleep(1000000);
             }
 
-            // Check if server is still running
-            if (!$session->isRunning()) {
-                unset(self::$sessions[$session_id]);
-
-                return $this->getFormatter()->formatError(
-                    'Review server stopped unexpectedly',
-                    $session_id
-                );
-            }
-
-            // Check if review was submitted
-            if (!$session->isSubmitted()) {
-                return $this->getFormatter()->formatWaiting($session);
-            }
-
-            // Collect and return results
-            $result = $session->collectResult();
-
-            if (null === $result) {
-                return $this->getFormatter()->formatError(
-                    'Failed to collect review results',
-                    $session_id
-                );
-            }
-
-            // Cleanup session
-            $session->shutdown();
-            unset(self::$sessions[$session_id]);
-
-            return $this->getFormatter()->formatResult($result);
+            // Timeout reached, return waiting status
+            return $this->getFormatter()->formatWaiting($session);
         } catch (\Throwable $e) {
             return $this->getFormatter()->formatError($e->getMessage(), $session_id);
         }
@@ -200,14 +221,13 @@ class SelfReviewTool
 
     #[McpTool(
         name: 'self-review-chat',
-        description: 'Answer pending questions from reviewer about the code changes. Uses MCP sampling to generate answers with context about what you changed.'
+        description: 'Get pending questions from reviewer about the code changes. Returns questions that need answers. Use self-review-answer to submit your response to each question.'
     )]
     public function chat(
         #[Schema(
             description: 'Session ID returned by self-review-start'
         )]
         string $session_id,
-        RequestContext $context,
     ): string {
         try {
             // Check if session exists
@@ -248,44 +268,68 @@ class SelfReviewTool
                 return $this->getFormatter()->formatNoPendingQuestions($session_id);
             }
 
-            $clientGateway = $context->getClientGateway();
-            $answered = 0;
+            return $this->getFormatter()->formatPendingQuestions($questions, $session->getContext());
+        } catch (\Throwable $e) {
+            return $this->getFormatter()->formatError($e->getMessage(), $session_id);
+        }
+    }
 
-            foreach ($questions as $question) {
-                $database->updateChatMessageStatus($question['id'], 'processing');
-
-                // Build context-aware prompt
-                $systemPrompt = $this->buildChatSystemPrompt($session, $question);
-
-                try {
-                    $result = $clientGateway->sample(
-                        $question['content'],
-                        1000,
-                        120,
-                        ['systemPrompt' => $systemPrompt]
-                    );
-
-                    $content = $result->content;
-                    $answerText = $content instanceof TextContent
-                        ? $content->text
-                        : 'Unable to process response (non-text content)';
-
-                    $database->addChatAnswer(
-                        $session_id,
-                        $question['id'],
-                        $answerText
-                    );
-                    ++$answered;
-                } catch (ClientException $e) {
-                    $database->updateChatMessageStatus(
-                        $question['id'],
-                        'error',
-                        $e->getMessage()
-                    );
-                }
+    #[McpTool(
+        name: 'self-review-answer',
+        description: 'Submit an answer to a reviewer question. Call self-review-chat first to get pending questions, then use this tool to answer each one.'
+    )]
+    public function answer(
+        #[Schema(
+            description: 'Session ID returned by self-review-start'
+        )]
+        string $session_id,
+        #[Schema(
+            description: 'Question ID from self-review-chat response'
+        )]
+        int $question_id,
+        #[Schema(
+            description: 'Your answer to the reviewer question'
+        )]
+        string $answer,
+    ): string {
+        try {
+            // Check if session exists
+            if (!isset(self::$sessions[$session_id])) {
+                return $this->getFormatter()->formatError(
+                    'Session not found. It may have expired or been closed.',
+                    $session_id
+                );
             }
 
-            return $this->getFormatter()->formatChatResult($answered, \count($questions));
+            $session = self::$sessions[$session_id];
+
+            // Check if session expired
+            if ($session->isExpired()) {
+                $session->shutdown();
+                unset(self::$sessions[$session_id]);
+
+                return $this->getFormatter()->formatError(
+                    'Session expired (TTL: 1 hour)',
+                    $session_id
+                );
+            }
+
+            // Check if server is still running
+            if (!$session->isRunning()) {
+                unset(self::$sessions[$session_id]);
+
+                return $this->getFormatter()->formatError(
+                    'Review server stopped unexpectedly',
+                    $session_id
+                );
+            }
+
+            $database = $session->getDatabase();
+
+            // Add the answer
+            $database->addChatAnswer($session_id, $question_id, $answer);
+
+            return $this->getFormatter()->formatAnswerSubmitted($question_id);
         } catch (\Throwable $e) {
             return $this->getFormatter()->formatError($e->getMessage(), $session_id);
         }
@@ -318,26 +362,5 @@ class SelfReviewTool
         }
 
         return $this->formatter;
-    }
-
-    /**
-     * Build context-aware system prompt for chat questions.
-     *
-     * @param array{id: int, content: string, file_context: ?string, line_context: ?int, status: string} $question
-     */
-    private function buildChatSystemPrompt(ReviewSession $session, array $question): string
-    {
-        $prompt = 'You are explaining code changes you made. ';
-        $prompt .= 'Context: '.($session->getContext() ?: 'Code review session')."\n\n";
-
-        if (null !== $question['file_context']) {
-            $prompt .= \sprintf('The question is about file: %s', $question['file_context']);
-            if (null !== $question['line_context']) {
-                $prompt .= \sprintf(' at line %d', $question['line_context']);
-            }
-            $prompt .= "\n\n";
-        }
-
-        return $prompt."Answer the reviewer's question concisely and helpfully.";
     }
 }

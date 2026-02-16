@@ -188,6 +188,17 @@ try {
             ]);
             break;
 
+            // GET /api/config - Get session configuration
+        case 'GET' === $method && '/config' === $path:
+            $chatEnabled = filter_var(
+                getenv('SELF_REVIEW_CHAT_ENABLED') ?: 'true',
+                \FILTER_VALIDATE_BOOLEAN
+            );
+            echo json_encode([
+                'chat_enabled' => $chatEnabled,
+            ]);
+            break;
+
             // GET /api/chat - Get all chat messages
         case 'GET' === $method && '/chat' === $path:
             $messages = $db->getChatMessages($sessionId);

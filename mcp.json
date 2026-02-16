@@ -5,7 +5,11 @@
             "args": [
                 "serve",
                 "--force-keep-alive"
-            ]
+            ],
+            "env": {
+                "MATE_DEBUG": "1",
+                "MATE_DEBUG_FILE": "1"
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ namespace MatesOfMate\SelfReviewExtension\Tests\Unit\Formatter;
 use MatesOfMate\SelfReviewExtension\Formatter\ToonFormatter;
 use MatesOfMate\SelfReviewExtension\Output\ReviewComment;
 use MatesOfMate\SelfReviewExtension\Output\ReviewResult;
+use MatesOfMate\SelfReviewExtension\Server\ReviewSession;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -175,26 +176,88 @@ class ToonFormatterTest extends TestCase
         $this->assertStringContainsString('Connection failed', $output);
     }
 
-    public function testFormatChatResult(): void
+    public function testFormatPendingQuestions(): void
     {
-        $output = $this->formatter->formatChatResult(3, 4);
+        $questions = [
+            [
+                'id' => 1,
+                'content' => 'Why did you use this approach?',
+                'file_context' => 'src/Example.php',
+                'line_context' => 42,
+                'status' => 'pending',
+            ],
+            [
+                'id' => 2,
+                'content' => 'Can you explain this?',
+                'file_context' => null,
+                'line_context' => null,
+                'status' => 'pending',
+            ],
+        ];
 
-        $this->assertStringContainsString('chat_processed', $output);
-        $this->assertStringContainsString('questions_answered', $output);
-        $this->assertStringContainsString('3', $output);
-        $this->assertStringContainsString('questions_total', $output);
-        $this->assertStringContainsString('4', $output);
-        $this->assertStringContainsString('questions_failed', $output);
-        $this->assertStringContainsString('1', $output);
+        $output = $this->formatter->formatPendingQuestions($questions, 'Test context');
+
+        $this->assertStringContainsString('pending_questions', $output);
+        $this->assertStringContainsString('Why did you use this approach?', $output);
+        $this->assertStringContainsString('src/Example.php', $output);
+        $this->assertStringContainsString('42', $output);
+        $this->assertStringContainsString('Can you explain this?', $output);
+        $this->assertStringContainsString('self-review-answer', $output);
+        $this->assertStringContainsString('Test context', $output);
     }
 
-    public function testFormatChatResultAllAnswered(): void
+    public function testFormatPendingQuestionsWithoutContext(): void
     {
-        $output = $this->formatter->formatChatResult(5, 5);
+        $questions = [
+            [
+                'id' => 1,
+                'content' => 'Question here',
+                'file_context' => null,
+                'line_context' => null,
+                'status' => 'pending',
+            ],
+        ];
 
-        $this->assertStringContainsString('chat_processed', $output);
-        $this->assertStringContainsString('questions_answered', $output);
-        $this->assertStringContainsString('5', $output);
+        $output = $this->formatter->formatPendingQuestions($questions, null);
+
+        $this->assertStringContainsString('pending_questions', $output);
+        $this->assertStringContainsString('Question here', $output);
+    }
+
+    public function testFormatAnswerSubmitted(): void
+    {
+        $output = $this->formatter->formatAnswerSubmitted(42);
+
+        $this->assertStringContainsString('answer_submitted', $output);
+        $this->assertStringContainsString('42', $output);
+        $this->assertStringContainsString('submitted successfully', $output);
+    }
+
+    public function testFormatWaitingWithQuestions(): void
+    {
+        $session = $this->createMock(ReviewSession::class);
+        $session->method('getId')->willReturn('abc123');
+        $session->method('getUrl')->willReturn('http://localhost:8081');
+        $session->method('commentCount')->willReturn(2);
+
+        $questions = [
+            [
+                'id' => 1,
+                'content' => 'Why this approach?',
+                'file_context' => 'src/Example.php',
+                'line_context' => 42,
+                'status' => 'pending',
+            ],
+        ];
+
+        $output = $this->formatter->formatWaitingWithQuestions($session, $questions);
+
+        $this->assertStringContainsString('waiting', $output);
+        $this->assertStringContainsString('abc123', $output);
+        $this->assertStringContainsString('pending_questions', $output);
+        $this->assertStringContainsString('Why this approach?', $output);
+        $this->assertStringContainsString('src/Example.php', $output);
+        $this->assertStringContainsString('self-review-answer', $output);
     }
 
     public function testFormatNoPendingQuestions(): void

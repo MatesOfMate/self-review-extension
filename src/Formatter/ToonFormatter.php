@@ -35,7 +35,8 @@ class ToonFormatter
                 'url' => $session->getUrl(),
                 'files' => $session->getFileCount(),
             ],
-            'instructions' => 'Review opened in browser. Call self-review-result with session_id when ready.',
+            'next_action' => 'IMMEDIATELY call self-review-result with this session_id to wait for review completion.',
+            'instructions' => 'Review opened in browser. The human will review and may ask questions via chat.',
         ]);
     }
 
@@ -84,7 +85,43 @@ class ToonFormatter
             'session_id' => $session->getId(),
             'url' => $session->getUrl(),
             'comment_count' => $session->commentCount(),
-            'message' => 'Review not yet submitted. Try again later or continue working.',
+            'message' => 'Review not yet submitted. Timeout reached, call self-review-result again to continue waiting.',
+        ]);
+    }
+
+    /**
+     * Format waiting response with pending questions that need answers.
+     *
+     * @param array<array{id: int, content: string, file_context: ?string, line_context: ?int, status: string}> $questions
+     */
+    public function formatWaitingWithQuestions(ReviewSession $session, array $questions): string
+    {
+        $formattedQuestions = [];
+
+        foreach ($questions as $question) {
+            $q = [
+                'id' => $question['id'],
+                'question' => $question['content'],
+            ];
+
+            if (null !== $question['file_context']) {
+                $q['file'] = $question['file_context'];
+            }
+
+            if (null !== $question['line_context']) {
+                $q['line'] = $question['line_context'];
+            }
+
+            $formattedQuestions[] = $q;
+        }
+
+        return toon([
+            'status' => 'waiting',
+            'session_id' => $session->getId(),
+            'url' => $session->getUrl(),
+            'comment_count' => $session->commentCount(),
+            'pending_questions' => $formattedQuestions,
+            'instructions' => 'Answer questions using self-review-answer, then call self-review-result again.',
         ]);
     }
 
@@ -106,16 +143,43 @@ class ToonFormatter
     }
 
     /**
-     * Format the chat processing result.
+     * Format pending questions for the agent to answer.
+     *
+     * @param array<array{id: int, content: string, file_context: ?string, line_context: ?int, status: string}> $questions
      */
-    public function formatChatResult(int $answered, int $total): string
+    public function formatPendingQuestions(array $questions, ?string $context): string
     {
-        return toon([
-            'chat_processed' => true,
-            'questions_answered' => $answered,
-            'questions_total' => $total,
-            'questions_failed' => $total - $answered,
-        ]);
+        $formattedQuestions = [];
+
+        foreach ($questions as $question) {
+            $q = [
+                'id' => $question['id'],
+                'question' => $question['content'],
+            ];
+
+            if (null !== $question['file_context']) {
+                $q['file'] = $question['file_context'];
+            }
+
+            if (null !== $question['line_context']) {
+                $q['line'] = $question['line_context'];
+            }
+
+            $formattedQuestions[] = $q;
+        }
+
+        $data = [
+            'status' => 'pending_questions',
+            'count' => \count($questions),
+            'questions' => $formattedQuestions,
+            'instructions' => 'Answer each question using self-review-answer with the question id.',
+        ];
+
+        if (null !== $context) {
+            $data['context'] = $context;
+        }
+
+        return toon($data);
     }
 
     /**
@@ -127,6 +191,18 @@ class ToonFormatter
             'status' => 'no_pending_questions',
             'session_id' => $sessionId,
             'message' => 'No pending chat questions to answer.',
+        ]);
+    }
+
+    /**
+     * Format confirmation that an answer was submitted.
+     */
+    public function formatAnswerSubmitted(int $questionId): string
+    {
+        return toon([
+            'status' => 'answer_submitted',
+            'question_id' => $questionId,
+            'message' => 'Answer submitted successfully. The reviewer will see it in the chat.',
         ]);
     }
 
