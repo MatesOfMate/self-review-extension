@@ -160,6 +160,9 @@ class SelfReviewTool
 
             // Poll for events until timeout
             while ((time() - $startTime) < $timeout) {
+                // Signal agent activity so watchdog does not kill the server while polling
+                $database->updateLastPingAt($session_id);
+
                 // Check if session expired
                 if ($session->isExpired()) {
                     $session->shutdown();
@@ -167,6 +170,17 @@ class SelfReviewTool
 
                     return $this->getFormatter()->formatError(
                         'Session expired (TTL: 1 hour)',
+                        $session_id
+                    );
+                }
+
+                // Check if browser disconnected (no ping for 10+ minutes)
+                if ($session->isStale()) {
+                    $session->shutdown();
+                    unset(self::$sessions[$session_id]);
+
+                    return $this->getFormatter()->formatError(
+                        'Session timed out - browser was closed without submitting',
                         $session_id
                     );
                 }
@@ -251,6 +265,17 @@ class SelfReviewTool
                 );
             }
 
+            // Check if browser disconnected (no ping for 10+ minutes)
+            if ($session->isStale()) {
+                $session->shutdown();
+                unset(self::$sessions[$session_id]);
+
+                return $this->getFormatter()->formatError(
+                    'Session timed out - browser was closed without submitting',
+                    $session_id
+                );
+            }
+
             // Check if server is still running
             if (!$session->isRunning()) {
                 unset(self::$sessions[$session_id]);
@@ -310,6 +335,17 @@ class SelfReviewTool
 
                 return $this->getFormatter()->formatError(
                     'Session expired (TTL: 1 hour)',
+                    $session_id
+                );
+            }
+
+            // Check if browser disconnected (no ping for 10+ minutes)
+            if ($session->isStale()) {
+                $session->shutdown();
+                unset(self::$sessions[$session_id]);
+
+                return $this->getFormatter()->formatError(
+                    'Session timed out - browser was closed without submitting',
                     $session_id
                 );
             }

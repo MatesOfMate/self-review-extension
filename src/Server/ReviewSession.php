@@ -25,7 +25,11 @@ class ReviewSession
 {
     private const TTL_SECONDS = 3600; // 1 hour
 
+    private const STALE_SECONDS = 600; // 10 minutes
+
     private Process $serverProcess;
+
+    private ?Process $watchdogProcess = null;
 
     private readonly int $createdAt;
 
@@ -45,6 +49,7 @@ class ReviewSession
         $this->createdAt = time();
         $this->database->createSession($this->id, $this->diff, $this->context);
         $this->startServer();
+        $this->startWatchdog();
         $this->openBrowser();
     }
 
@@ -111,6 +116,17 @@ class ReviewSession
         return (time() - $this->createdAt) > self::TTL_SECONDS;
     }
 
+    public function isStale(): bool
+    {
+        $lastPingAt = $this->database->getLastPingAt($this->id);
+        if (null === $lastPingAt) {
+            return false;
+        }
+        $lastPingTime = strtotime($lastPingAt);
+
+        return false !== $lastPingTime && (time() - $lastPingTime) > self::STALE_SECONDS;
+    }
+
     public function isRunning(): bool
     {
         return $this->serverProcess->isRunning();
@@ -121,6 +137,34 @@ class ReviewSession
         if ($this->serverProcess->isRunning()) {
             $this->serverProcess->stop(3);
         }
+
+        if ($this->watchdogProcess instanceof Process && $this->watchdogProcess->isRunning()) {
+            $this->watchdogProcess->stop(3);
+        }
+    }
+
+    private function startWatchdog(): void
+    {
+        $serverPid = $this->serverProcess->getPid();
+        if (null === $serverPid) {
+            return;
+        }
+
+        $watchdogPath = __DIR__.'/watchdog.php';
+        if (!file_exists($watchdogPath)) {
+            return;
+        }
+
+        $this->watchdogProcess = new Process([
+            \PHP_BINARY,
+            $watchdogPath,
+            '--db-path='.\sprintf('%s/self-review-%s.sqlite', sys_get_temp_dir(), $this->id),
+            '--session-id='.$this->id,
+            '--server-pid='.$serverPid,
+            '--stale-seconds='.self::STALE_SECONDS,
+        ]);
+        $this->watchdogProcess->setTimeout(null);
+        $this->watchdogProcess->start();
     }
 
     private function startServer(): void

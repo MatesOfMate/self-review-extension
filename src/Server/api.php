@@ -59,6 +59,17 @@ try {
     exit;
 }
 
+// Check for stale session (no browser ping for 10+ minutes)
+$lastPingAt = $db->getLastPingAt($sessionId);
+if (null !== $lastPingAt) {
+    $lastPingTime = strtotime($lastPingAt);
+    if (false !== $lastPingTime && (time() - $lastPingTime) > 600) {
+        http_response_code(503);
+        echo json_encode(['error' => 'Session timed out - browser disconnected'], \JSON_THROW_ON_ERROR);
+        exit(0);
+    }
+}
+
 // Parse request
 $method = $_SERVER['REQUEST_METHOD'];
 $uri = $_SERVER['REQUEST_URI'];
@@ -89,7 +100,13 @@ if (in_array($method, ['POST', 'PUT'], true)) {
 // Route handlers
 try {
     switch (true) {
-        // GET /api/diff - Get parsed diff
+        // POST /api/ping - Browser heartbeat to keep session alive
+        case 'POST' === $method && '/ping' === $path:
+            $db->updateLastPingAt($sessionId);
+            echo json_encode(['ok' => true], \JSON_THROW_ON_ERROR);
+            break;
+
+            // GET /api/diff - Get parsed diff
         case 'GET' === $method && '/diff' === $path:
             $diffJson = $db->getDiffJson($sessionId);
             if (null === $diffJson) {

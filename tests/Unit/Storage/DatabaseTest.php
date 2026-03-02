@@ -259,6 +259,40 @@ class DatabaseTest extends TestCase
         $this->assertSame('HEAD', $decoded['headRef']);
     }
 
+    public function testGetLastPingAtInitiallySet(): void
+    {
+        $diff = $this->createDiffResult();
+        $this->database->createSession('test-session', $diff);
+
+        $lastPingAt = $this->database->getLastPingAt('test-session');
+
+        $this->assertNotNull($lastPingAt);
+    }
+
+    public function testGetLastPingAtReturnsNullForNonexistentSession(): void
+    {
+        $lastPingAt = $this->database->getLastPingAt('nonexistent');
+
+        $this->assertNull($lastPingAt);
+    }
+
+    public function testUpdateLastPingAt(): void
+    {
+        $diff = $this->createDiffResult();
+        $this->database->createSession('test-session', $diff);
+
+        $before = $this->database->getLastPingAt('test-session');
+
+        sleep(1);
+        $this->database->updateLastPingAt('test-session');
+
+        $after = $this->database->getLastPingAt('test-session');
+
+        $this->assertNotNull($before);
+        $this->assertNotNull($after);
+        $this->assertGreaterThanOrEqual($before, $after);
+    }
+
     public function testAddChatMessage(): void
     {
         $diff = $this->createDiffResult();
