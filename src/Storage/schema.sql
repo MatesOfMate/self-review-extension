@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS sessions (
     diff_json TEXT NOT NULL,
     status TEXT DEFAULT 'in_progress',
     created_at TEXT DEFAULT (datetime('now')),
-    submitted_at TEXT
+    submitted_at TEXT,
+    last_ping_at TEXT DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS comments (

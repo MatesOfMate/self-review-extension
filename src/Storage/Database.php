@@ -38,6 +38,10 @@ class Database
             ]
         );
 
+        // WAL mode allows concurrent readers and a writer without blocking each other.
+        // Required because the watchdog process and the MCP server both access the DB.
+        $this->pdo->exec('PRAGMA journal_mode=WAL');
+
         $this->initializeSchema();
     }
 
@@ -308,6 +312,27 @@ class Database
         $stmt->execute([$sessionId]);
 
         return false !== $stmt->fetch();
+    }
+
+    /**
+     * Update the last ping timestamp for a session.
+     */
+    public function updateLastPingAt(string $sessionId): void
+    {
+        $stmt = $this->pdo->prepare("UPDATE sessions SET last_ping_at = datetime('now') WHERE id = ?");
+        $stmt->execute([$sessionId]);
+    }
+
+    /**
+     * Get the last ping timestamp for a session.
+     */
+    public function getLastPingAt(string $sessionId): ?string
+    {
+        $stmt = $this->pdo->prepare('SELECT last_ping_at FROM sessions WHERE id = ?');
+        $stmt->execute([$sessionId]);
+        $result = $stmt->fetch();
+
+        return false !== $result ? $result['last_ping_at'] : null;
     }
 
     /**

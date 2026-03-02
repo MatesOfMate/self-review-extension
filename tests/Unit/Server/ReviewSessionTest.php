@@ -55,4 +55,28 @@ class ReviewSessionTest extends TestCase
         $this->assertTrue($method->isPublic(), 'isChatEnabled() should be public');
         $this->assertSame('bool', (string) $method->getReturnType());
     }
+
+    public function testIsStaleMethodExists(): void
+    {
+        $reflection = new \ReflectionClass(ReviewSession::class);
+
+        $this->assertTrue(
+            $reflection->hasMethod('isStale'),
+            'ReviewSession should have isStale() method'
+        );
+
+        $method = $reflection->getMethod('isStale');
+        $this->assertTrue($method->isPublic(), 'isStale() should be public');
+        $this->assertSame('bool', (string) $method->getReturnType());
+    }
+
+    public function testStaleSecondsConstantExists(): void
+    {
+        $reflection = new \ReflectionClass(ReviewSession::class);
+
+        $this->assertTrue(
+            $reflection->hasConstant('STALE_SECONDS'),
+            'ReviewSession should have STALE_SECONDS constant'
+        );
+    }
 }

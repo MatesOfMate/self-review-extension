@@ -1319,7 +1319,8 @@
                 chatEnabled: true,
                 chatCodeContext: null,
                 reviewModalOpen: false,
-                contextExpanded: false
+                contextExpanded: false,
+                pingInterval: null
             },
 
             async init() {
@@ -1354,6 +1355,8 @@
                         this.startChatPolling();
                     }
 
+                    this.startPing();
+
                     this.render();
                 } catch (e) {
                     this.state.error = e.message;
@@ -1369,6 +1372,14 @@
                         await this.refreshChat();
                     }
                 }, 3000);
+            },
+
+            startPing() {
+                if (this.state.pingInterval) clearInterval(this.state.pingInterval);
+                fetch('/api/ping', { method: 'POST' }).catch(() => {});
+                this.state.pingInterval = setInterval(() => {
+                    fetch('/api/ping', { method: 'POST' }).catch(() => {});
+                }, 60000);
             },
 
             async refreshChat() {
